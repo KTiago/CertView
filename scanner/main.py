@@ -11,10 +11,12 @@ from helpers.producer import KafkaProducer
 async def computation(producer, raw, date):
     try:
         data = json.loads(raw)
+        certificate = data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['raw']
         result = await producer.produce("scan", {"date":date, "data":data})
         return { "timestamp": result.timestamp() }
-    except KafkaException as ex:
-        raise HTTPException(status_code=500, detail=ex.args[0].str())
+    except Exception:
+        pass
+        #raise HTTPException(status_code=500, detail=ex.args[0].str())
 
 async def read(producer, child_conn):
     date = datetime.datetime.now().strftime("%Y-%m-%d")

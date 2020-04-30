@@ -34,13 +34,13 @@ async def receive(consumer, producer):
                 if issuer_common_name:
                     issuer_common_name = issuer_common_name[0]
                 else:
-                    return
+                    continue
                 subject_common_name = deep_get(data,
                                                'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name')
                 if subject_common_name:
                     subject_common_name = subject_common_name[0]
                 else:
-                    return
+                    continue
 
                 upper = False
                 lower = False
@@ -62,7 +62,7 @@ async def receive(consumer, producer):
                 key_length = deep_get(data,
                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject_key_info.rsa_public_key.length')
 
-                if True or correct_pattern \
+                if correct_pattern \
                         and issuer_common_name == subject_common_name \
                         and validity == 31536000 \
                         and key_length == 2048:
