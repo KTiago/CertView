@@ -1,9 +1,18 @@
 from functools import reduce
+from http.client import HTTPException
 import confluent_kafka
+from confluent_kafka.cimpl import KafkaException
 from helpers.producer import KafkaProducer
 import asyncio
 import sys
 import json
+
+async def computation(producer, body):
+    try:
+        result = await producer.produce("tags", body)
+        return { "timestamp": result.timestamp() }
+    except KafkaException as ex:
+        raise HTTPException(status_code=500, detail=ex.args[0].str())
 
 async def receive(consumer, producer):
     try:
@@ -15,7 +24,6 @@ async def receive(consumer, producer):
                 raise confluent_kafka.KafkaException(msg.error())
             else:
                 value = json.loads(msg.value())
-                print(value)
                 data = value['data']
                 date = value['date']
 
@@ -54,7 +62,7 @@ async def receive(consumer, producer):
                 key_length = deep_get(data,
                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject_key_info.rsa_public_key.length')
 
-                if correct_pattern \
+                if True or correct_pattern \
                         and issuer_common_name == subject_common_name \
                         and validity == 31536000 \
                         and key_length == 2048:
@@ -64,7 +72,7 @@ async def receive(consumer, producer):
                         "tag": "icedid",
                         "comment": "cluster-2"
                     }
-                    asyncio.create_task(await producer.produce("tags", body))
+                    asyncio.create_task(computation(producer, body))
     except KeyboardInterrupt:
         sys.stderr.write('%% Aborted by user\n')
 
