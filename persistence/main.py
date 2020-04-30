@@ -3,10 +3,9 @@ from elasticsearch import Elasticsearch
 import json
 import sys
 def main():
-    # Kafka configuration
-    conf = {'bootstrap.servers': "localhost:9092", 'group.id': "frontend", 'session.timeout.ms': 6000,
+    conf_consumer = {'bootstrap.servers': "localhost:9092", 'group.id': "elasticsearch", 'session.timeout.ms': 6000,
             'auto.offset.reset': 'earliest'}
-    consumer = confluent_kafka.Consumer(conf)
+    consumer = confluent_kafka.Consumer(conf_consumer)
     consumer.subscribe(["scan", "tags"])
 
     # Elasticsearch configuration
@@ -25,9 +24,12 @@ def main():
                     data = value['data']
                     date = value['date']
 
+                    try:
+                        sha1 = data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['parsed'][
+                                'fingerprint_sha1']
+                    except KeyError:
+                        continue
 
-                    sha1 = data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['parsed'][
-                            'fingerprint_sha1']
                     raw = data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['raw']
 
                     try:

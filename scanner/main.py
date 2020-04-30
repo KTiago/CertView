@@ -35,13 +35,13 @@ def run_producer(child_conn):
     loop.run_until_complete(read(producer, child_conn))
     time.sleep(60)
     loop.close()
-    producer()
+    producer.close()
     print("Done producing")
 
 def main():
     while True:
         print("Scan started")
-        proc = subprocess.Popen("zmap -r 50000 --sender-threads=2 --cores=0,1 -p 443 -n 1% -o - | ztee hosts.txt | ./zgrab2 tls -o certificates.txt --gomaxprocs=4 --senders=4000", shell=True)
+        proc = subprocess.Popen("zmap -r 50000 --sender-threads=3 --cores=0,1,2 -p 443 -n 100% -o - | ztee hosts.txt | ./zgrab2 tls -o certificates.txt --gomaxprocs=4 --senders=4000", shell=True)
         parent_conn, child_conn = Pipe()
         p = Process(target=run_producer, args=(child_conn,))
         p.start()
@@ -49,6 +49,7 @@ def main():
         parent_conn.send("done")
         p.join()
         print("Scan ended")
+
 
 if __name__ == "__main__":
     main()
