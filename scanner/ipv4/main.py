@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import json
 import datetime
@@ -30,9 +31,10 @@ async def read(producer, child_conn):
                     break
                 await asyncio.sleep(0.5)
 
-def run_producer(child_conn):
+def run_producer(bootstrap_servers, child_conn):
     print("Start producing")
-    config = {"bootstrap.servers": "localhost:9092"}
+    print(bootstrap_servers)
+    config = {"bootstrap.servers": bootstrap_servers}
     loop = asyncio.get_event_loop()
     producer = KafkaProducer(config, loop)
     loop.run_until_complete(read(producer, child_conn))
@@ -41,12 +43,12 @@ def run_producer(child_conn):
     producer.close()
     print("Done producing")
 
-def main():
+def main(bootstrap_servers):
     while True:
         print("Scan started")
         proc = subprocess.Popen("zmap -r 50000 --sender-threads=3 --cores=0,1,2 -p 443 -n 100% -o - | ztee hosts.txt | ./zgrab2 tls -o certificates.txt --gomaxprocs=4 --senders=4000", shell=True)
         parent_conn, child_conn = Pipe()
-        p = Process(target=run_producer, args=(child_conn,))
+        p = Process(target=run_producer, args=(bootstrap_servers, child_conn,))
         p.start()
         proc.wait()
         parent_conn.send("done")
@@ -55,4 +57,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description='IPv4 scanner which pushes certificates to Kafka')
+    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
+    args = parser.parse_args()
+
+    main(args.bootstrap_servers)

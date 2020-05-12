@@ -7,12 +7,14 @@ import asyncio
 import sys
 import json
 
+
 async def computation(producer, body):
     try:
         result = await producer.produce("tags", body)
-        return { "timestamp": result.timestamp() }
+        return {"timestamp": result.timestamp()}
     except KafkaException as ex:
         raise HTTPException(status_code=500, detail=ex.args[0].str())
+
 
 async def receive(consumer, producer):
     try:
@@ -79,8 +81,10 @@ async def receive(consumer, producer):
     finally:
         consumer.close()
 
+
 def deep_get(dictionary, keys, default=None):
     return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."), dictionary)
+
 
 def main():
     conf_producer = {"bootstrap.servers": "localhost:9092"}
@@ -93,6 +97,7 @@ def main():
     consumer.subscribe(["scan"])
 
     loop.run_until_complete(receive(consumer, producer))
+
 
 if __name__ == "__main__":
     main()
