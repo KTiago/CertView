@@ -46,7 +46,7 @@ def run_producer(bootstrap_servers, child_conn):
 def main(bootstrap_servers):
     while True:
         print("Scan started")
-        proc = subprocess.Popen("zmap -r 50000 --sender-threads=3 --cores=0,1,2 -p 443 -n 100% -o - | ztee hosts.txt | ./zgrab2 tls -o certificates.txt --gomaxprocs=4 --senders=4000", shell=True)
+        proc = subprocess.Popen("zmap -r 50000 --sender-threads=3 --cores=0,1,2 -p 443 -n 100% -o - | ztee hosts.txt | ./zgrab2 tls -o certificates.txt --gomaxprocs=4 --senders=4000 --blacklist-file=/scanner/ipv4/blacklist.conf", shell=True)
         parent_conn, child_conn = Pipe()
         p = Process(target=run_producer, args=(bootstrap_servers, child_conn,))
         p.start()

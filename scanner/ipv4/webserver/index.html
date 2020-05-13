@@ -1,9 +1,9 @@
 <html>
  <head>
-  <title>CertWatch</title>
+  <title>CertView</title>
  </head>
  <body>
-    <h1>CertWatch Project</h1>
+    <h1>CertView</h1>
     	<p> We are researchers in the field of computer security currently conducting internet wide scans to collect TLS certificates on port 443. The collected data is not used for any malicious purpose. </p>
 	<p> Our scan consists in a TCP SYN scan to discover hosts reponsive on port 443 on the entire IPv4 range followed by a TLS handshake to collect the certificates from reponsive hosts. </p>
         <p> The scan is purposefully spread over time in order to limit any negative impact. The order of hosts is chosen randomly to evenly distribute the load, resulting in any /16 IPv4 range being subject to less than 1 TCP SYN packet (and TLS handshake) every 2 seconds. </p>
