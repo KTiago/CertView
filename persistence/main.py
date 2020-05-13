@@ -1,9 +1,11 @@
+import argparse
+
 import confluent_kafka
 from elasticsearch import Elasticsearch
 import json
 import sys
-def main():
-    conf_consumer = {'bootstrap.servers': "localhost:9092", 'group.id': "elasticsearch", 'session.timeout.ms': 6000,
+def main(bootstrap_servers):
+    conf_consumer = {'bootstrap.servers': bootstrap_servers, 'group.id': "elasticsearch", 'session.timeout.ms': 6000,
             'auto.offset.reset': 'earliest'}
     consumer = confluent_kafka.Consumer(conf_consumer)
     consumer.subscribe(["scan", "tags"])
@@ -19,7 +21,8 @@ def main():
             if msg.error():
                 raise confluent_kafka.KafkaException(msg.error())
             else:
-                if msg.topic() == "scan":
+                topic = msg.topic()
+                if topic == "scan" or topic == "ct":
                     value = json.loads(msg.value())
                     data = value['data']
                     date = value['date']
@@ -57,6 +60,8 @@ def main():
                         "raw" : raw,
                         "tls_version" : tls_version,
                         "tls_cipher_suite": tls_cipher_suite,
+                        "scan" : topic == "scan",
+                        "ct" : topic == "ct"
                     }
 
                     res = es.index(index="certificates", id=id, body=body)
@@ -86,4 +91,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description='Kafka consumer which persists certificates to Elasticsearch')
+    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
+    args = parser.parse_args()
+
+    main(args.bootstrap_servers)

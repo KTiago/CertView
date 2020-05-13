@@ -1,3 +1,4 @@
+import argparse
 from functools import reduce
 from http.client import HTTPException
 import confluent_kafka
@@ -86,12 +87,12 @@ def deep_get(dictionary, keys, default=None):
     return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."), dictionary)
 
 
-def main():
-    conf_producer = {"bootstrap.servers": "localhost:9092"}
+def main(bootstrap_servers):
+    conf_producer = {"bootstrap.servers": bootstrap_servers}
     loop = asyncio.get_event_loop()
     producer = KafkaProducer(conf_producer, loop)
 
-    conf_consumer = {'bootstrap.servers': "localhost:9092", 'group.id': "analyzer-1", 'session.timeout.ms': 6000,
+    conf_consumer = {'bootstrap.servers': bootstrap_servers, 'group.id': "analyzer-1", 'session.timeout.ms': 6000,
                      'auto.offset.reset': 'earliest'}
     consumer = confluent_kafka.Consumer(conf_consumer)
     consumer.subscribe(["scan"])
@@ -100,4 +101,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description='Certificate Transparency log scanner which pushes new certificates to Kafka')
+    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
+    args = parser.parse_args()
+
+    main(args.bootstrap_servers)
