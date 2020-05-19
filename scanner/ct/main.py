@@ -148,7 +148,6 @@ class CTScanner(object):
                         async for result_chunk in self.get_new_results(operator_information, latest_size, tree_size):
                             for entry in result_chunk:
                                 data = parse_ctl_entry(entry, operator_information)
-                                print(data)
                                 result = await self.producer.produce("ct", {"date": date, "data": data})
 
 
