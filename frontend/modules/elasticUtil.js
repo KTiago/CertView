@@ -17,12 +17,13 @@ module.exports = {
                 query: {
                     "match_all": {}
                 }
-            }
+            },
+            size: 1000,
         },{
             ignore: [404],
             maxRetries: 3
         })
-        if (result['body']['statusCode'] !== 200){
+        if (result['statusCode'] !== 200){
             return null
         }
         return result['body']['hits']['hits']

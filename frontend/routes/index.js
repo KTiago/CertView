@@ -1,11 +1,10 @@
 var express = require('express');
+var path = require('path');
 var router = express.Router();
 
-let landing = require('../controllers/landing')
-
-/* GET home page. */
-router.get('/', landing.get_landing);
-router.post("/", landing.submit_search);
+/* GET users listing. */
+router.get('/', function(req, res, next) {
+    res.sendFile(path.join(__dirname, '../public', 'index.html'))
+});
 
 module.exports = router;
-

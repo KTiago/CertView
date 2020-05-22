@@ -1,8 +1,0 @@
-extends layout
-
-block content
-  h1= title
-  p Welcome to #{title}
-  form(action="/", method="POST")
-    input(name="search_term", type="text", placeholder="Enter your search term")
-    button(type=submit) Submit

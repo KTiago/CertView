@@ -8,6 +8,7 @@
     <title>CertView</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/jumbotron/">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <!-- Bootstrap core CSS -->
     <style>
@@ -39,13 +40,13 @@
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="index">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="analysis">Analysis</a>
+                <a class="nav-link active" href="analysis">Analysis <span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item active">
-                <a class="nav-link" href="about">About <span class="sr-only">(current)</span></a>
+            <li class="nav-item">
+                <a class="nav-link" href="about">About</a>
             </li>
         </ul>
         <a class="nav-link px-1 mx-1 py-3 my-n2" href="https://github.com/KTiago/CertView" target="_blank" rel="noopener" aria-label="GitHub">
@@ -55,13 +56,29 @@
 </nav>
 
 <main role="main">
-
     <div class="jumbotron">
         <div class="container">
-            <h1 class="display-5">The CertView project</h1>
-            <p>The CertView platform leverages a live feed of certificates from Certificate Transparency logs and active IPv4 scans to offer open-source analysis of the certificates.</p>
-            <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent in ex urna. Maecenas tempus pharetra turpis, in venenatis nulla. Aliquam viverra lacus eu dui fringilla gravida. Nam ut aliquet purus. Aliquam et ante sed ante maximus lobortis sed rhoncus est. Proin commodo dapibus est. Integer imperdiet scelerisque consectetur. Sed commodo justo ut nulla fringilla ultricies. Proin mattis auctor orci eu maximus. Curabitur lobortis urna at semper vulputate. Vestibulum molestie, enim a ultricies fringilla, risus nisi rhoncus tortor, sed condimentum massa dolor non ligula.</p>
-            <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent in ex urna. Maecenas tempus pharetra turpis, in venenatis nulla. Aliquam viverra lacus eu dui fringilla gravida. Nam ut aliquet purus. Aliquam et ante sed ante maximus lobortis sed rhoncus est. Proin commodo dapibus est. Integer imperdiet scelerisque consectetur. Sed commodo justo ut nulla fringilla ultricies. Proin mattis auctor orci eu maximus. Curabitur lobortis urna at semper vulputate. Vestibulum molestie, enim a ultricies fringilla, risus nisi rhoncus tortor, sed condimentum massa dolor non ligula.</p>
+            <table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th class="th-sm">tag</th>
+                    <th class="th-sm">sha1</th>
+                    <th class="th-sm">ip</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (var i = 0; i < data.length;  i++) { %>
+                    <tr>
+                        <td><%= tag %></td>
+                        <td><%= data[i]['_source']['sha1']  %></td>
+                        <td><%= data[i]['_source']['ip']  %></td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+            <!--
+                <form action="/" method="POST"><input name="search_term" type="text" placeholder="Enter your search term" /><button>Submit</button></form>
+            -->
         </div>
     </div>
 
@@ -70,8 +87,19 @@
 <footer class="container">
     <p>&copy; CertView 2020</p>
 </footer>
+
+
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#dtBasicExample').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
 </body>
 </html>
