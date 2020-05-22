@@ -132,3 +132,6 @@ dmypy.json
 .idea/
 
 /analyzer/data/*
+
+# node.js
+/frontend/node_modules
