@@ -3,11 +3,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var favicon = require('serve-favicon');
 
 var indexRouter = require('./routes/index');
 var analysisRouter = require('./routes/analysis');
 
 var app = express();
+app.use(favicon(path.join(__dirname, 'public', 'images','favicon.ico')))
+
 // setup elastic client
 var elasticClient = require('./modules/elasticUtil');
 elasticClient.connect()
@@ -25,9 +28,6 @@ app.use('/', indexRouter);
 app.use('/analysis', analysisRouter);
 
 app.use(express.static(path.join(__dirname, 'public'),{extensions: ['html', 'htm']}));
-
-//app.use('/', indexRouter);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
