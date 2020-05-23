@@ -27,5 +27,18 @@ module.exports = {
             return null
         }
         return result['body']['hits']['hits']
+    },
+    get: async function(index, id){
+        result = await client.get({
+            index: index,
+            id: id,
+        },{
+            ignore: [404],
+            maxRetries: 3
+        })
+        if (result['statusCode'] !== 200){
+            return null
+        }
+        return result['body']['_source']
     }
 };

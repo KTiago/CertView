@@ -7,6 +7,7 @@ var favicon = require('serve-favicon');
 
 var indexRouter = require('./routes/index');
 var analysisRouter = require('./routes/analysis');
+var certificatesRouter = require('./routes/certificates');
 
 var app = express();
 app.use(favicon(path.join(__dirname, 'public', 'images','favicon.ico')))
@@ -26,6 +27,7 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/analysis', analysisRouter);
+app.use('/certificates', certificatesRouter);
 
 app.use(express.static(path.join(__dirname, 'public'),{extensions: ['html', 'htm']}));
 
