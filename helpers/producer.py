@@ -2,7 +2,7 @@ import confluent_kafka
 from threading import Thread
 import json
 
-class KafkaProducer:
+class AsyncProducer:
     def __init__(self, configs, loop):
         self._producer = confluent_kafka.Producer(configs)
         self._loop = loop

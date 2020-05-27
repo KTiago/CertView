@@ -7,7 +7,7 @@ import time
 from http.client import HTTPException
 from multiprocessing import Process, Pipe
 from confluent_kafka.cimpl import KafkaException
-from helpers.producer import KafkaProducer
+from helpers.producer import AsyncProducer
 
 
 async def computation(producer, raw, date):
@@ -39,7 +39,7 @@ def run_producer(bootstrap_servers, child_conn):
     print(bootstrap_servers)
     config = {"bootstrap.servers": bootstrap_servers}
     loop = asyncio.get_event_loop()
-    producer = KafkaProducer(config, loop)
+    producer = AsyncProducer(config, loop)
     loop.run_until_complete(read(producer, child_conn))
     time.sleep(60)
     loop.close()

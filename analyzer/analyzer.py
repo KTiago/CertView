@@ -3,7 +3,7 @@ import asyncio
 import json
 import sys
 
-from helpers.producer import KafkaProducer
+from helpers.producer import AsyncProducer
 from abc import ABC, abstractmethod
 
 
@@ -31,7 +31,7 @@ class Analyzer:
             'session.timeout.ms': 6000,
             'auto.offset.reset': 'earliest'
         })
-        self.producer = KafkaProducer({'bootstrap.servers': bootstrap_servers}, self.loop)
+        self.producer = AsyncProducer({'bootstrap.servers': bootstrap_servers}, self.loop)
 
     async def __analyze(self):
         try:

@@ -32,7 +32,7 @@ import os
 from random import randint
 
 import asyncio
-from helpers.producer import KafkaProducer
+from helpers.producer import AsyncProducer
 from helpers.certlib import parse_ctl_entry
 
 
@@ -184,7 +184,6 @@ class CTScanner(object):
             return
 
     async def get_new_results(self, operator_information, latest_size, tree_size):
-        # The top of the tree isn't actually a cert yet, so the total_size is what we're aiming for
         total_size = tree_size - latest_size
         start = latest_size
 
@@ -224,7 +223,7 @@ class CTScanner(object):
 def main(bootstrap_servers):
     loop = asyncio.get_event_loop()
     config = {"bootstrap.servers": bootstrap_servers}
-    producer = KafkaProducer(config, loop)
+    producer = AsyncProducer(config, loop)
     scanner = CTScanner(producer, loop)
     loop.run_until_complete(asyncio.gather(*scanner.get_tasks()))
 

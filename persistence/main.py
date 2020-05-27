@@ -28,9 +28,9 @@ def main(bootstrap_servers):
             else:
                 topic = msg.topic()
                 if topic == "scan":
-                    value = json.loads(msg.value())
-                    data = value['data']
-                    date = value['date']
+                    message = json.loads(msg.value())
+                    data = message['data']
+                    date = message['date']
 
                     try:
                         sha1 = \
@@ -97,14 +97,10 @@ def main(bootstrap_servers):
                     except Exception as e:
                         print(e)
                 elif topic == "ct":
-                    value = json.loads(msg.value())
-                    data = value['data']
-                    date = value['date']
-
-                    try:
-                        sha1 = data['leaf_cert']['fingerprint'].lower().replace(":", "")
-                    except:
-                        continue
+                    message = json.loads(msg.value())
+                    data = message['data']
+                    date = message['date']
+                    sha1 = message['sha1']
 
                     body = {
                         "date": date,
