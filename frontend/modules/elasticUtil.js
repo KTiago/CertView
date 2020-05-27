@@ -4,7 +4,6 @@ var client;
 
 module.exports = {
     connect: function(){
-        console.log("Creating ElasticSearch client")
         client = new Client({ node: url });
     },
     getClient: function(){
