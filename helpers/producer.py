@@ -18,7 +18,7 @@ class KafkaProducer:
         self._cancelled = True
         self._poll_thread.join()
 
-    def produce(self, topic, value):
+    def __produce(self, topic, value):
         result = self._loop.create_future()
 
         def ack(err, msg):
@@ -28,4 +28,8 @@ class KafkaProducer:
                 self._loop.call_soon_threadsafe(result.set_result, msg)
 
         self._producer.produce(topic, json.dumps(value).encode('utf-8'), on_delivery=ack)
+        return result
+
+    async def produce(self, topic, value):
+        result = await self.__produce(self, topic, value)
         return result

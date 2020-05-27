@@ -70,9 +70,9 @@ class CTScanner(object):
         self.stopped = False
         self.logger = logging.getLogger('certstream.watcher')
 
-        #logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
 
-        #self.stream = asyncio.Queue(maxsize=3000)
+        # self.stream = asyncio.Queue(maxsize=3000)
 
         self.logger.info("Initializing the CTL watcher")
 
@@ -83,7 +83,8 @@ class CTScanner(object):
             self.logger.fatal("Invalid response from certificate directory! Exiting :(")
             sys.exit(1)
 
-        self.logger.info("Retrieved transparency log with {} entries to watch.".format(len(self.transparency_logs['logs'])))
+        self.logger.info(
+            "Retrieved transparency log with {} entries to watch.".format(len(self.transparency_logs['logs'])))
         for entry in self.transparency_logs['logs']:
             if entry['url'].endswith('/'):
                 entry['url'] = entry['url'][:-1]
@@ -118,6 +119,14 @@ class CTScanner(object):
         for task in asyncio.Task.all_tasks():
             task.cancel()
 
+    def get_sha1(self, data):
+        cert = data.get('leaf_cert')
+        if cert:
+            fingerprint = cert.get('fingerprint')
+            if fingerprint:
+                return fingerprint.lower().replace(":", "")
+        return None
+
     async def watch_for_updates_task(self, operator_information):
         try:
             # Randomize starting times to smooth spikes
@@ -127,8 +136,9 @@ class CTScanner(object):
             while not self.stopped:
                 date = datetime.now().strftime("%Y-%m-%d")
                 try:
-                    async with aiohttp.ClientSession(loop=self.loop) as session:
-                        async with session.get("https://{}/ct/v1/get-sth".format(operator_information['url'])) as response:
+                    async with aiohttp.ClientSession(loop=self.loop, connector=aiohttp.TCPConnector(ssl=False)) as session:
+                        async with session.get(
+                                "https://{}/ct/v1/get-sth".format(operator_information['url'])) as response:
                             info = await response.json()
                 except aiohttp.ClientError as e:
                     self.logger.info('[{}] Exception -> {}'.format(name, e))
@@ -148,7 +158,9 @@ class CTScanner(object):
                         async for result_chunk in self.get_new_results(operator_information, latest_size, tree_size):
                             for entry in result_chunk:
                                 data = parse_ctl_entry(entry, operator_information)
-                                result = await self.producer.produce("ct", {"date": date, "data": data})
+                                sha1 = self.get_sha1(data)
+                                if sha1:
+                                    result = await self.producer.produce("ct", {"date": date, "data": data, "sha1": sha1})
 
 
                     except aiohttp.ClientError as e:
@@ -163,7 +175,8 @@ class CTScanner(object):
 
                     latest_size = tree_size
                 else:
-                    self.logger.debug('[{}][{}|{}] No update needed, continuing...'.format(name, latest_size, tree_size))
+                    self.logger.debug(
+                        '[{}][{}|{}] No update needed, continuing...'.format(name, latest_size, tree_size))
 
                 await asyncio.sleep(30)
         except Exception as e:
@@ -179,7 +192,9 @@ class CTScanner(object):
 
         chunks = math.ceil(total_size / self.MAX_BLOCK_SIZE)
 
-        self.logger.info("Retrieving {} certificates ({} -> {}) for {}".format(tree_size-latest_size, latest_size, tree_size, operator_information['description']))
+        self.logger.info(
+            "Retrieving {} certificates ({} -> {}) for {}".format(tree_size - latest_size, latest_size, tree_size,
+                                                                  operator_information['description']))
         async with aiohttp.ClientSession(loop=self.loop) as session:
             for _ in range(chunks):
                 # Cap the end to the last record in the DB
@@ -196,7 +211,7 @@ class CTScanner(object):
                     if 'error_message' in certificates:
                         print("error!")
 
-                    for index, cert in zip(range(start, end+1), certificates['entries']):
+                    for index, cert in zip(range(start, end + 1), certificates['entries']):
                         cert['index'] = index
 
                     yield certificates['entries']
@@ -204,6 +219,7 @@ class CTScanner(object):
                 start += self.MAX_BLOCK_SIZE
 
                 end = start + self.MAX_BLOCK_SIZE + 1
+
 
 def main(bootstrap_servers):
     loop = asyncio.get_event_loop()
@@ -214,7 +230,8 @@ def main(bootstrap_servers):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Certificate Transparency log scanner which pushes new certificates to Kafka')
+    parser = argparse.ArgumentParser(
+        description='Certificate Transparency log scanner which pushes new certificates to Kafka')
     parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
     args = parser.parse_args()
 
