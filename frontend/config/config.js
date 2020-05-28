@@ -2,7 +2,13 @@ module.exports = {
     "production":{
         "username" : "elastic",
         "password" : "some_password",
-        "host" : "127.0.0.1",
+        "host" : "localhost",
+        "port" : "9200",
+    },
+    "development":{
+        "username" : "elastic",
+        "password" : "some_password",
+        "host" : "localhost",
         "port" : "9200",
     }
 }

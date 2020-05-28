@@ -1,10 +1,16 @@
 const { Client } = require('@elastic/elasticsearch')
-const url = "http://localhost:9200"
+const config = require('../config/config')
 var client;
 
 module.exports = {
     connect: function(){
-        client = new Client({ node: url });
+        client = new Client({
+            node: "http://"+config.development['host']+":"+config.development['port'],
+            auth: {
+                username: config.development['username'],
+                password: config.development['password']
+            }
+        });
     },
     getClient: function(){
         return client;
