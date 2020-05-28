@@ -19,6 +19,9 @@ app.use(favicon(path.join(__dirname, 'public', 'images','favicon.ico')))
 var elasticClient = require('./modules/elasticUtil');
 elasticClient.connect()
 
+// generate csv files periodically
+setInterval(elasticClient.generateCSV, 600000);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs');

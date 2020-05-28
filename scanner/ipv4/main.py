@@ -4,9 +4,7 @@ import json
 import datetime
 import subprocess
 import time
-from http.client import HTTPException
 from multiprocessing import Process, Pipe
-from confluent_kafka.cimpl import KafkaException
 from helpers.utils import AsyncProducer, deep_get
 
 async def read(producer, child_conn):
@@ -17,11 +15,12 @@ async def read(producer, child_conn):
             if raw:
                 try:
                     data = json.loads(raw)
-                    sha1 = \
-                    data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['parsed'][
-                        'fingerprint_sha1']
-                    body = {"date": date, "data": data, "sha1": sha1}
-                    asyncio.create_task(producer.produce("scan", body))
+                    sha1 = deep_get(data,
+                                    'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha1',
+                                    None)
+                    if sha1:
+                        body = {"date": date, "data": data, "sha1": sha1}
+                        asyncio.create_task(producer.produce("scan", body))
                 except Exception as e:
                     print(e)
                     continue
