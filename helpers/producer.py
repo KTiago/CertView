@@ -31,5 +31,5 @@ class AsyncProducer:
         return result
 
     async def produce(self, topic, value):
-        result = await self.__produce(self, topic, value)
+        result = await self.__produce(topic, value)
         return result

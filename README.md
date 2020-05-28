@@ -14,7 +14,12 @@ Platform that collects TLS certificates from active scans and certificate transp
     └── ipv4     	# Active IPv4 scanner using Zmap/Zgrab.
 ```
 ## Setup commands (not exhaustive)
+### Scan
+CPU : n1-standard-2
+Memory : 600Gb
 ### Kafka
+CPU : g1-small
+Memory : 100Gb
 ```bash
 gcloud compute ssh kafka
 sudo apt-get install default-jdk
@@ -27,6 +32,8 @@ bin/zookeeper-server-start.sh config/zookeeper.properties
 bin/kafka-server-start.sh config/server.properties
 ```
 ### Persistence
+CPU : n1-standard-1
+Memory : 500Gb
 ```bash
 wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
 sudo apt-get install apt-transport-https
@@ -55,6 +62,8 @@ elasticsearch.hosts: ["http://<IP_ADDRESS>:9200"]
 sudo systemctl start kibana
 ```
 ### Analyzer
+CPU : f1-micro
+Memory : 10Gb
 ```bash
 
 sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
@@ -73,8 +82,9 @@ cd CertWatch/analyzer
 python main.py --datadir=/home/user/CertWatch/analyzer/data -A main worker --web-port=6066
 ```
 ### Frontend
+CPU : f1-micro
+Memory : 10Gb
 ```bash
-
 sudo apt-get install git
 sudo apt-get install nodejs
 sudo apt-get install npm
