@@ -23,7 +23,7 @@ async def computation(producer, raw, date):
 
 async def read(producer, child_conn):
     date = datetime.datetime.now().strftime("%Y-%m-%d")
-    with open('/home/user/Project/CertView/certificates.txt') as f:
+    with open('certificates.txt', 'r') as f:
         while True:
             raw = f.readline()
             if raw:
@@ -57,6 +57,7 @@ def main(bootstrap_servers):
 
         parent_conn, child_conn = Pipe()
         p = Process(target=run_producer, args=(bootstrap_servers, child_conn,))
+        time.sleep(5)
         p.start()
         proc.wait()
         parent_conn.send("done")

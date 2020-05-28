@@ -6,7 +6,7 @@ import json
 import sys
 
 
-def main(bootstrap_servers):
+def main(bootstrap_servers, host, port, user, password):
     consumerConfiguration = {'bootstrap.servers': bootstrap_servers,
                              'group.id': "elasticsearch",
                              'session.timeout.ms': 6000,
@@ -15,8 +15,10 @@ def main(bootstrap_servers):
     consumer.subscribe(["scan", "ct", "tags"])
 
     # Elasticsearch configuration
-    # Enter correct host and user information here !
-    es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+    if user and password:
+        es = Elasticsearch([{'host': host, 'port': port}], http_auth=(user, password))
+    else:
+        es = Elasticsearch([{'host': host, 'port': port}])
 
     try:
         while True:
@@ -31,14 +33,7 @@ def main(bootstrap_servers):
                     message = json.loads(msg.value())
                     data = message['data']
                     date = message['date']
-
-                    try:
-                        sha1 = \
-                            data['data']['tls']['result']['handshake_log']['server_certificates']['certificate'][
-                                'parsed'][
-                                'fingerprint_sha1']
-                    except KeyError:
-                        continue
+                    sha1 = message['sha1']
 
                     raw = data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['raw']
 
@@ -130,7 +125,11 @@ def main(bootstrap_servers):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Kafka consumer which persists certificates to Elasticsearch')
-    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
+    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of Kafka brokers')
+    parser.add_argument('--host', default='localhost', help='Elasticsearch server host address')
+    parser.add_argument('--port', default=9200, help='Elasticsearch server port')
+    parser.add_argument('--user', help='Elasticsearch server user')
+    parser.add_argument('--password', help='Elasticsearch server password')
     args = parser.parse_args()
 
-    main(args.bootstrap_servers)
+    main(args.bootstrap_servers, args.host, args.port, args.user, args.password)
