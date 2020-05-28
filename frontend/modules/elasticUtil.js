@@ -5,10 +5,10 @@ var client;
 module.exports = {
     connect: function(){
         client = new Client({
-            node: "http://"+config.development['host']+":"+config.development['port'],
+            node: "http://"+config.production['host']+":"+config.production['port'],
             auth: {
-                username: config.development['username'],
-                password: config.development['password']
+                username: config.production['username'],
+                password: config.production['password']
             }
         });
     },
@@ -29,7 +29,7 @@ module.exports = {
             maxRetries: 3
         })
         if (result['statusCode'] !== 200){
-            return null
+            return []
         }
         return result['body']['hits']['hits']
     },
@@ -42,7 +42,7 @@ module.exports = {
             maxRetries: 3
         })
         if (result['statusCode'] !== 200){
-            return null
+            return []
         }
         return result['body']['_source']
     }
