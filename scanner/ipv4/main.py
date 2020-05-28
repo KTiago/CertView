@@ -1,4 +1,4 @@
-import argparse
+import yaml
 import asyncio
 import json
 import datetime
@@ -7,7 +7,7 @@ import time
 from http.client import HTTPException
 from multiprocessing import Process, Pipe
 from confluent_kafka.cimpl import KafkaException
-from helpers.producer import AsyncProducer
+from helpers.utils import AsyncProducer, deep_get
 
 async def read(producer, child_conn):
     date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -47,10 +47,10 @@ def run_producer(bootstrap_servers, child_conn):
 def main(bootstrap_servers):
     while True:
         print("Scan started")
-        #proc = subprocess.Popen(
-        #    "zmap -r 20000 --blacklist-file=scanner/ipv4/blacklist.conf --sender-threads=3 --cores=0 -p 443 -n 100% -o - | ztee hosts.txt | ./zgrab2 tls -o certificates.txt --gomaxprocs=1 --senders=1000",
-        #    shell=True)
-        proc = subprocess.Popen("./zgrab2 tls -f hosts.txt -o certificates.txt --gomaxprocs=1 --senders=1000",shell=True) # For testing only
+        proc = subprocess.Popen(
+           "zmap -r 10000 --blacklist-file=config/blacklist.conf --sender-threads=1 --cores=0 -p 443 -n 100% -o - | ztee hosts.txt | ./bin/zgrab2 tls -o certificates.txt --gomaxprocs=1 --senders=1000",
+            shell=True)
+        #proc = subprocess.Popen("./bin/zgrab2 tls -f hosts.txt -o certificates.txt --gomaxprocs=1 --senders=1000",shell=True) # For testing only
 
         parent_conn, child_conn = Pipe()
         p = Process(target=run_producer, args=(bootstrap_servers, child_conn,))
@@ -63,9 +63,6 @@ def main(bootstrap_servers):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='IPv4 scanner which pushes certificates to Kafka')
-    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
-    args = parser.parse_args()
-
-    main(args.bootstrap_servers)
+    with open("config/config.yml", "r") as configFile:
+        cfg = yaml.safe_load(configFile)
+        main(cfg['kafka']['bootstrap_servers'])

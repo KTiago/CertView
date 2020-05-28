@@ -20,9 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from datetime import datetime
-import argparse
+import yaml
 import aiohttp
-import asyncio
 import logging
 import math
 import requests
@@ -32,7 +31,7 @@ import os
 from random import randint
 
 import asyncio
-from helpers.producer import AsyncProducer
+from helpers.utils import AsyncProducer
 from helpers.certlib import parse_ctl_entry
 
 
@@ -229,9 +228,6 @@ def main(bootstrap_servers):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='Certificate Transparency log scanner which pushes new certificates to Kafka')
-    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
-    args = parser.parse_args()
-
-    main(args.bootstrap_servers)
+    with open("config/config.yml", "r") as configFile:
+        cfg = yaml.safe_load(configFile)
+        main(cfg['kafka']['bootstrap_servers'])

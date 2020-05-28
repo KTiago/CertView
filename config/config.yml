@@ -1,0 +1,8 @@
+kafka:
+    bootstrap_servers: localhost:9092
+
+elasticsearch:
+    host: localhost
+    port: 9200
+    user: elastic
+    password: password

@@ -1,9 +1,8 @@
 import confluent_kafka
 import asyncio
 import json
-import sys
 
-from helpers.producer import AsyncProducer
+from helpers.utils import AsyncProducer
 from abc import ABC, abstractmethod
 
 
@@ -57,11 +56,14 @@ class Analyzer:
                                 "comment": comment,
                             }
                             asyncio.create_task(self.producer.produce("tags", body))
-        except KeyboardInterrupt: # TODO KeyboardInterrupt not great, please implement graceful shutdown
-            sys.stderr.write('%% Aborted by user\n')
+        except Exception as e: # TODO very bad error catching, please implement graceful shutdown
+            print(e)
         finally:
             self.consumer.close()
 
     def start(self):
         self.consumer.subscribe(self.topics)
-        self.loop.run_until_complete(self.__analyze())
+        try:
+            self.loop.run_until_complete(self.__analyze()) # TODO implement graceful shutdown
+        except KeyboardInterrupt:
+            print("Received exit, exiting")

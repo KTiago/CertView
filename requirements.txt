@@ -3,3 +3,4 @@ elasticsearch==7.6.0
 pyOpenSSL==19.1.0
 construct==2.8.22
 requests==2.23.0
+PyYAML==5.1.2

@@ -1,12 +1,6 @@
-import argparse
-from functools import reduce
-from analyzer import Analyzer, Module
-
-
-def deep_get(dictionary, keys, default=None):
-    return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."),
-                  dictionary)
-
+import yaml
+from analyzer.analysis import Analyzer, Module
+from helpers.utils import deep_get
 
 class IcedidModule1(Module):
 
@@ -77,8 +71,6 @@ def main(bootstrap_servers):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='Certificate Transparency log scanner which pushes new certificates to Kafka')
-    parser.add_argument('--bootstrap_servers', default="localhost:9092", help='Comma separated list of brokers')
-    args = parser.parse_args()
-    main(args.bootstrap_servers)
+    with open("config/config.yml", "r") as configFile:
+        cfg = yaml.safe_load(configFile)
+        main(cfg['kafka']['bootstrap_servers'])
