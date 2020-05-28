@@ -9,25 +9,22 @@ from multiprocessing import Process, Pipe
 from confluent_kafka.cimpl import KafkaException
 from helpers.producer import AsyncProducer
 
-
-async def computation(producer, raw, date):
-    try:
-        data = json.loads(raw)
-        sha1 = data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['parsed']['fingerprint_sha1']
-        result = await producer.produce("scan", {"date": date, "data": data, "sha1": sha1})
-        return {"timestamp": result.timestamp()}
-    except Exception:
-        pass
-        # raise HTTPException(status_code=500, detail=ex.args[0].str())
-
-
 async def read(producer, child_conn):
     date = datetime.datetime.now().strftime("%Y-%m-%d")
     with open('certificates.txt', 'r') as f:
         while True:
             raw = f.readline()
             if raw:
-                asyncio.create_task(computation(producer, raw, date))
+                try:
+                    data = json.loads(raw)
+                    sha1 = \
+                    data['data']['tls']['result']['handshake_log']['server_certificates']['certificate']['parsed'][
+                        'fingerprint_sha1']
+                    body = {"date": date, "data": data, "sha1": sha1}
+                    asyncio.create_task(producer.produce("scan", body))
+                except Exception as e:
+                    print(e)
+                    continue
             else:
                 if child_conn.poll():  # Scan is done, and no new line to read
                     break
