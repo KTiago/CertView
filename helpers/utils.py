@@ -1,3 +1,5 @@
+import asyncio
+
 import confluent_kafka
 from threading import Thread
 import json
