@@ -16,7 +16,40 @@ Platform that collects TLS certificates from active scans and certificate transp
 ## Setup commands (not exhaustive)
 ### Scan
 CPU : n1-standard-2
-Memory : 600Gb
+Memory : 100Gb
+```bash
+# Install python3.8
+sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
+wget https://www.python.org/ftp/python/3.8.2/Python-3.8.2.tgz
+tar xvf Python-3.8.2.tgz
+cd Python-3.8.2
+./configure --enable-optimizations --enable-shared --with-ensurepip=install
+make -j8
+sudo make altinstall
+sudo ln -s -f /usr/local/bin/python3.8 /usr/local/bin/python
+sudo ldconfig
+cd ~
+# optional
+sudo apt-get install bmon
+# required
+sudo apt-get update
+sudo apt-get install virtualenv
+sudo apt-get install zmap
+sudo apt-get install git
+git clone https://github.com/KTiago/CertView.git
+cd CertView
+# ipv4 scan needs to be run as superuser to access eth0
+sudo su
+virtualenv venv -p python3.8
+source venv/bin/activate
+pip3 install -r requirements.txt
+cd scanner/ipv4/webserver
+nohup python -m http.server 80 &
+cd ../../../
+# edit config/config.yaml
+export PYTHONPATH="."
+python scanner/ipv4/main.py
+```
 ### Kafka
 CPU : g1-small
 Memory : 100Gb
