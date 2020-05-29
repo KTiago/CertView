@@ -20,13 +20,13 @@ class Analyzer:
                  modules,
                  topics,
                  bootstrap_servers="localhost:9092",
-                 analyzer_id="default_analyzer",):
+                 analyzer_id="default_analyzer"):
         self.modules = modules
         self.topics = topics
         self.loop = asyncio.get_event_loop()
         self.consumer = confluent_kafka.Consumer({
             'bootstrap.servers': bootstrap_servers,
-            'group.id': analyzer_id+"2",
+            'group.id': analyzer_id,
             'session.timeout.ms': 6000,
             'auto.offset.reset': 'earliest'
         })

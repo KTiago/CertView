@@ -135,7 +135,8 @@ class CTScanner(object):
             while not self.stopped:
                 date = datetime.now().strftime("%Y-%m-%d")
                 try:
-                    async with aiohttp.ClientSession(loop=self.loop, connector=aiohttp.TCPConnector(ssl=False)) as session:
+                    async with aiohttp.ClientSession(loop=self.loop,
+                                                     connector=aiohttp.TCPConnector(ssl=False)) as session:
                         async with session.get(
                                 "https://{}/ct/v1/get-sth".format(operator_information['url'])) as response:
                             info = await response.json()
@@ -159,7 +160,8 @@ class CTScanner(object):
                                 data = parse_ctl_entry(entry, operator_information)
                                 sha1 = self.get_sha1(data)
                                 if sha1:
-                                    result = await self.producer.produce("ct", {"date": date, "data": data, "sha1": sha1})
+                                    result = await self.producer.produce("ct",
+                                                                         {"date": date, "data": data, "sha1": sha1})
 
 
                     except aiohttp.ClientError as e:
@@ -221,7 +223,10 @@ class CTScanner(object):
 
 def main(bootstrap_servers):
     loop = asyncio.get_event_loop()
-    config = {"bootstrap.servers": bootstrap_servers}
+    config = {'bootstrap.servers': bootstrap_servers,
+              'group.id': "ct-scan",
+              'session.timeout.ms': 30000,
+              'auto.offset.reset': 'earliest'}
     producer = AsyncProducer(config, loop)
     scanner = CTScanner(producer, loop)
     loop.run_until_complete(asyncio.gather(*scanner.get_tasks()))
