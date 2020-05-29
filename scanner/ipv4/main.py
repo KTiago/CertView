@@ -27,7 +27,7 @@ async def read(producer, child_conn):
                         body = {"date": date, "data": data, "sha1": sha1}
                         asyncio.create_task(producer.produce("scan", body))
                 except Exception as e:
-                    logging.ERROR(e)
+                    logging.error(e)
                     continue
             else:
                 if child_conn.poll():  # Scan is done, and no new line to read

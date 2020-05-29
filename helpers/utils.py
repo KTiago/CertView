@@ -3,10 +3,9 @@ from threading import Thread
 import json
 from functools import reduce
 
-def deep_get(dict, keys, default=None):
-    return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default,
-                  keys.split("."),
-                  dict)
+def deep_get(dictionary, keys, default=None):
+    return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."),
+                  dictionary)
 
 class LoggerWriter:
     def __init__(self, logger, level):
