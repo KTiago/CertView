@@ -1,6 +1,7 @@
 import yaml
 from analyzer.analysis import Analyzer, Module
 from helpers.utils import deep_get
+import logging
 
 class IcedidModule1(Module):
 
@@ -64,6 +65,12 @@ class IcedidModule2(Module):
 
 
 def main(bootstrap_servers):
+    # Logger setup
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        filename='analyzer.log',
+                        level=logging.DEBUG)
+
     modules = [IcedidModule1("icedid"), IcedidModule2("icedid")]
     topics = ["scan"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)

@@ -1,10 +1,11 @@
 import confluent_kafka
 import asyncio
 import json
+import logging
+
 
 from helpers.utils import AsyncProducer
 from abc import ABC, abstractmethod
-
 
 class Module(ABC):
     def __init__(self, tag):
@@ -55,16 +56,19 @@ class Analyzer:
                                 "tag": module.tag,
                                 "comment": comment,
                             }
+                            logging.info("Found match :")
+                            logging.info(str(body))
                             task = asyncio.create_task(self.producer.produce("tags", body))
                             await task
         except Exception as e: # TODO very bad error catching, please implement graceful shutdown
-            print(e)
+            logging.error(e)
         finally:
             self.consumer.close()
 
     def start(self):
+        logging.info("Starting analyzer")
         self.consumer.subscribe(self.topics)
         try:
             self.loop.run_until_complete(self.__analyze()) # TODO implement graceful shutdown
         except KeyboardInterrupt:
-            print("Received exit, exiting")
+            logging.info("Received exit, exiting")

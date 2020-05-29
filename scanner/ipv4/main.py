@@ -13,7 +13,7 @@ async def scan(producer):
     while True:  # Continuously run new full IPv4 range scans
         logging.info('New scan started')
         proc = subprocess.Popen(
-            "zmap --log-file=zmap.log -r 10000 --blacklist-file=config/blacklist.conf --sender-threads=1 --cores=0 -p 443 -n 100% -o - | ztee hosts.txt | ./bin/zgrab2 tls -o - --gomaxprocs=1 --senders=1000",
+            "zmap -q --log-file=zmap.log -r 10000 --blacklist-file=config/blacklist.conf --sender-threads=1 --cores=0 -p 443 -n 100% -o - | ztee hosts.txt | ./bin/zgrab2 tls -o - --gomaxprocs=1 --senders=1000",
             shell=True,
             stdout=subprocess.PIPE)
 
@@ -30,11 +30,12 @@ async def scan(producer):
                                     None)
                     if sha1: # Send certificate and metadata to Kafka
                         body = {"date": date, "data": data, "sha1": sha1}
-                        task = asyncio.create_task(producer.produce("scan", body)) # TODO REALLY THINK THIS ONE TROUGH
+                        task = asyncio.create_task(producer.produce("scan", body)) # TODO : REALLY THINK THIS ONE TROUGH
                         await task
                 except Exception as e:
                     logging.error(e)
                     continue
+
         logging.info('Scan ended')
         time.sleep(600)
 
