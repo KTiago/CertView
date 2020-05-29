@@ -66,7 +66,6 @@
                 <tr>
                     <th class="th-sm">tag</th>
                     <th class="th-sm">sha1</th>
-                    <th class="th-sm">ip</th>
                     <th class="th-sm">comment</th>
                     <th class="th-sm">date</th>
                 </tr>
@@ -76,7 +75,6 @@
                     <tr>
                         <td><%= data[i]['_source']['tag'] %></td>
                         <td><a target="_blank" rel="noopener noreferrer" href="/certificates?sha1=<%= data[i]['_source']['sha1']  %>"><%= data[i]['_source']['sha1']  %></a></td>
-                        <td><%= data[i]['_source']['ip']  %></td>
                         <td><%= data[i]['_source']['comment']  %></td>
                         <td><%= data[i]['_source']['date']  %></td>
                     </tr>
