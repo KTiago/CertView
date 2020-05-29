@@ -55,7 +55,8 @@ class Analyzer:
                                 "tag": module.tag,
                                 "comment": comment,
                             }
-                            asyncio.create_task(self.producer.produce("tags", body))
+                            task = asyncio.create_task(self.producer.produce("tags", body))
+                            await task
         except Exception as e: # TODO very bad error catching, please implement graceful shutdown
             print(e)
         finally:

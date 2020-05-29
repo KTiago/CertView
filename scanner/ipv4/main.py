@@ -30,7 +30,8 @@ async def scan(producer):
                                     None)
                     if sha1: # Send certificate and metadata to Kafka
                         body = {"date": date, "data": data, "sha1": sha1}
-                        asyncio.create_task(producer.produce("scan", body))
+                        task = asyncio.create_task(producer.produce("scan", body)) # TODO REALLY THINK THIS ONE TROUGH
+                        await task
                 except Exception as e:
                     logging.error(e)
                     continue
