@@ -2,9 +2,10 @@ import yaml
 import confluent_kafka
 import json
 import sys
+import logging
 
 from elasticsearch import Elasticsearch
-from helpers.utils import deep_get
+from helpers.utils import deep_get, LoggerWriter
 
 
 def main(bootstrap_servers, host, port, user, password):
@@ -65,8 +66,10 @@ def main(bootstrap_servers, host, port, user, password):
                     }
                     try:
                         res = es.index(index="certificates", id=sha1, body=body)
+                        if res['result'] != "created" and res['result'] != "updated":
+                            logging.warning(str(res))
                     except Exception as e:
-                        print(e)
+                        logging.error(e)
 
                     ip = deep_get(data,
                                   'ip',
@@ -86,8 +89,10 @@ def main(bootstrap_servers, host, port, user, password):
                     }
                     try:
                         res = es.index(index="hosts_{date}".format(date=date), body=body)
+                        if res['result'] != "created" and res['result'] != "updated":
+                            logging.warning(str(res))
                     except Exception as e:
-                        print(e)
+                        logging.error(e)
 
                 elif topic == "ct":
                     message = json.loads(msg.value())
@@ -117,14 +122,14 @@ def main(bootstrap_servers, host, port, user, password):
                     try:
                         res = es.index(index="certificates", id=sha1, body=body)
                     except Exception as e:
-                        print(e)
+                        logging.error(e)
 
                 elif msg.topic() == "tags":
                     body = json.loads(msg.value())
                     try:
                         res = es.index(index="tags", body=body)
                     except Exception as e:
-                        print(e)
+                        logging.error(e)
 
     except KeyboardInterrupt:
         sys.stderr.write('Aborted by user\n')
@@ -134,6 +139,14 @@ def main(bootstrap_servers, host, port, user, password):
 
 
 if __name__ == "__main__":
+    # Logger setup
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        filename='ipv4-scan.log',
+                        level=logging.DEBUG)
+    sys.stderr = LoggerWriter(logging.getLogger(), logging.ERROR)
+    logging.info('Starting ipv4 scanning program')
+
     with open("config/config.yml", "r") as configFile:
         cfg = yaml.safe_load(configFile)
         main(cfg['kafka']['bootstrap_servers'],

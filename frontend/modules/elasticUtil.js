@@ -44,7 +44,7 @@ module.exports = {
             maxRetries: 3
         })
         if (result['statusCode'] !== 200){
-            return []
+            return null
         }
         return result['body']['_source']
     },
