@@ -61,7 +61,7 @@
     <div class="jumbotron">
         <div class="container">
             <form action="/certificates" method="GET"><input name="sha1" type="text" placeholder="Enter sha1 hash" /><button>Search</button></form>
-            <h2>Information from out database</h2>
+            <h2>Certificate information</h2>
             <table class="table">
                 <tbody>
                 <tr>
@@ -92,6 +92,25 @@
                     <th scope="row">ASN.1 structure</th>
                     <td><a target="_blank" rel="noopener noreferrer" href="https://lapo.it/asn1js/#<%= certificate['raw'] %>">External link to online decoder</a></td>
                 </tr>
+                </tbody>
+            </table>
+            <h2>Host information</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="th-sm">ip</th>
+                    <th class="th-sm">first seen</th>
+                    <th class="th-sm">last seen</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (var i = 0; i < hosts.length;  i++) { %>
+                    <tr>
+                        <td><%= hosts[i]['ip'] %></td>
+                        <td><%= hosts[i]['first_seen'] %></td>
+                        <td><%= hosts[i]['last_seen'] %></td>
+                    </tr>
+                <% } %>
                 </tbody>
             </table>
         </div>

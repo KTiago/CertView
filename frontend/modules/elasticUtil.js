@@ -35,6 +35,53 @@ module.exports = {
         }
         return result['body']['hits']['hits']
     },
+    searchHosts: async function(sha1){
+        result = await client.search({
+            index: "hosts*",
+            body: {
+                query: {
+                    "terms": {
+                        "sha1": [sha1]
+                    }
+                }
+            },
+            size: 1000,
+        },{
+            ignore: [404],
+            maxRetries: 3
+        })
+        if (result['statusCode'] !== 200){
+            return []
+        }
+        hits = result['body']['hits']['hits']
+
+        var firstSeen = {};
+        var lastSeen = {};
+        var ipSet = new Set()
+        for (var i = 0; i < hits.length; i++) {
+            ip = hits[i]['_source']['ip']
+            date = hits[i]['_source']['date']
+            if (! ipSet.has(ip)){
+                ipSet.add(ip)
+                firstSeen[ip] = date
+                lastSeen[ip] = date
+            }else{
+                if (firstSeen[ip] > date){
+                    firstSeen[ip] = date
+                }
+                if (lastSeen[ip] < date){
+                    lastSeen[ip] = date
+                }
+            }
+        }
+        var hosts = []
+        ipSet.forEach(ip => hosts.push({
+            "ip" : ip,
+            "first_seen" : firstSeen[ip],
+            "last_seen" : lastSeen[ip]
+        }));
+        return hosts
+    },
     get: async function(index, id){
         result = await client.get({
             index: index,
@@ -70,7 +117,6 @@ module.exports = {
                     sha1 : hits[i]['_source']['sha1'],
                 })
             }
-            console.log(list)
             csv = new ObjectsToCsv(list)
             await csv.toDisk('./public/datasets/analysis.csv')
         }

@@ -11,12 +11,14 @@ router.get('/', async function(req, res, next) {
     res.render('certificate_not_found')
   }else{
     var certificate = await elastic.get("certificates", sha1)
+    var hosts = await elastic.searchHosts(sha1)
     if (certificate === null){
       res.status(404)
       res.render('certificate_not_found')
     }else{
       res.render('certificate', {
-        certificate: certificate
+        certificate: certificate,
+        hosts : hosts
       });
     }
   }

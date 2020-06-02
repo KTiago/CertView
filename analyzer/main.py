@@ -34,9 +34,9 @@ class IcedidModule1(Module):
                     incorrect = True
                 dot = True
                 prefix_length = i
-            elif subject_common_name[i].isupper():
+            elif subject_common_name[i].isupper() and not dot:
                 upper = True
-            elif subject_common_name[i].islower():
+            elif subject_common_name[i].islower() and not dot:
                 lower = True
             elif subject_common_name[i] == '-':
                 banned = True

@@ -121,6 +121,7 @@ Memory : 10Gb
 sudo apt-get install git
 sudo apt-get install nodejs
 sudo apt-get install npm
+sudo apt-get install nginx
 git clone https://github.com/KTiago/CertView.git
 cd CertView/frontend/
 npm install
