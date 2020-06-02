@@ -26,16 +26,21 @@ class IcedidModule1(Module):
         lower = False
         prefix_length = 0
         dot = False
+        banned = False
+        incorrect = False
         for i in range(len(subject_common_name)):
             if subject_common_name[i] == '.':
+                if dot:
+                    incorrect = True
                 dot = True
                 prefix_length = i
-                break
             elif subject_common_name[i].isupper():
                 upper = True
             elif subject_common_name[i].islower():
                 lower = True
-        correct_pattern = upper and lower and dot and prefix_length == 10
+            elif subject_common_name[i] == '-':
+                banned = True
+        correct_pattern = upper and lower and dot and prefix_length == 10 and not banned and not incorrect
 
         validity = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.parsed.validity.length')

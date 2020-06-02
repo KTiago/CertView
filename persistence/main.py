@@ -142,8 +142,8 @@ if __name__ == "__main__":
     # Logger setup
     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        filename='ipv4-scan.log',
-                        level=logging.DEBUG)
+                        filename='persistence.log',
+                        level=logging.WARNING)
     sys.stderr = LoggerWriter(logging.getLogger(), logging.ERROR)
     logging.info('Starting ipv4 scanning program')
 
