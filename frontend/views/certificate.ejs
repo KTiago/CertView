@@ -101,6 +101,8 @@
                     <th class="th-sm">ip</th>
                     <th class="th-sm">first seen</th>
                     <th class="th-sm">last seen</th>
+                    <th class="th-sm">tls version</th>
+                    <th class="th-sm">tls cipher suite</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -109,6 +111,8 @@
                         <td><%= hosts[i]['ip'] %></td>
                         <td><%= hosts[i]['first_seen'] %></td>
                         <td><%= hosts[i]['last_seen'] %></td>
+                        <td><%= hosts[i]['tls_version'] %></td>
+                        <td><%= hosts[i]['tls_cipher_suite'] %></td>
                     </tr>
                 <% } %>
                 </tbody>

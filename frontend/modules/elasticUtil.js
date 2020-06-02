@@ -57,20 +57,29 @@ module.exports = {
 
         var firstSeen = {};
         var lastSeen = {};
+        var tlsCipherSuite = {}
+        var tlsVersion = {}
         var ipSet = new Set()
         for (var i = 0; i < hits.length; i++) {
             ip = hits[i]['_source']['ip']
             date = hits[i]['_source']['date']
+            cipherSuite = hits[i]['_source']['tls_cipher_suite']
+            version = hits[i]['_source']['tls_version']
             if (! ipSet.has(ip)){
                 ipSet.add(ip)
                 firstSeen[ip] = date
                 lastSeen[ip] = date
+                tlsCipherSuite[ip] = cipherSuite
+                tlsVersion[ip] = version
             }else{
                 if (firstSeen[ip] > date){
                     firstSeen[ip] = date
                 }
                 if (lastSeen[ip] < date){
                     lastSeen[ip] = date
+                    // Set cipher suite and version to latest observation
+                    tlsCipherSuite[ip] = cipherSuite
+                    tlsVersion[ip] = version
                 }
             }
         }
@@ -78,7 +87,9 @@ module.exports = {
         ipSet.forEach(ip => hosts.push({
             "ip" : ip,
             "first_seen" : firstSeen[ip],
-            "last_seen" : lastSeen[ip]
+            "last_seen" : lastSeen[ip],
+            "tls_cipher_suite" : tlsCipherSuite[ip],
+            "tls_version" : tlsVersion[ip],
         }));
         return hosts
     },

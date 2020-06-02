@@ -66,8 +66,6 @@ def main(bootstrap_servers, host, port, user, password):
                             "issuer_common_name": issuer_common_name,
                             "subject_common_name": subject_common_name,
                             "raw": raw,
-                            "tls_version": tls_version,
-                            "tls_cipher_suite": tls_cipher_suite,
                             "scan": True,
                         }
                     )
@@ -90,6 +88,8 @@ def main(bootstrap_servers, host, port, user, password):
                             "md5": md5,
                             "sha1": sha1,
                             "sha256": sha256,
+                            "tls_version": tls_version,
+                            "tls_cipher_suite": tls_cipher_suite,
                         }
                     )
 
