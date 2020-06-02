@@ -5,8 +5,9 @@ import sys
 import logging
 
 from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
 from helpers.utils import deep_get, LoggerWriter
-
+from collections import deque
 
 def main(bootstrap_servers, host, port, user, password):
     consumerConfiguration = {'bootstrap.servers': bootstrap_servers,
@@ -55,22 +56,21 @@ def main(bootstrap_servers, host, port, user, password):
                                                 'data.tls.result.handshake_log.server_hello.cipher_suite.hex',
                                                 "")
 
-                    body = {
-                        "date": date,
-                        "sha1": sha1,
-                        "issuer_common_name": issuer_common_name,
-                        "subject_common_name": subject_common_name,
-                        "raw": raw,
-                        "tls_version": tls_version,
-                        "tls_cipher_suite": tls_cipher_suite,
-                        "scan": True,
-                    }
-                    try:
-                        res = es.index(index="certificates", id=sha1, body=body)
-                        if res['result'] != "created" and res['result'] != "updated":
-                            logging.warning(str(res))
-                    except Exception as e:
-                        logging.error(e)
+
+                    actions.append(
+                        {
+                            "_index": "certificates",
+                            "_id": sha1,
+                            "date": date,
+                            "sha1": sha1,
+                            "issuer_common_name": issuer_common_name,
+                            "subject_common_name": subject_common_name,
+                            "raw": raw,
+                            "tls_version": tls_version,
+                            "tls_cipher_suite": tls_cipher_suite,
+                            "scan": True,
+                        }
+                    )
 
                     ip = deep_get(data,
                                   'ip',
@@ -81,17 +81,15 @@ def main(bootstrap_servers, host, port, user, password):
                     sha256 = deep_get(data,
                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha256',
                                       "")
-                    body = {
-                        "ip": ip,
-                        "date": date,
-                        "md5": md5,
-                        "sha1": sha1,
-                        "sha256": sha256,
-                    }
+
                     actions.append(
                         {
                             "_index" : "hosts_{date}".format(date=date),
-                            "doc" : body
+                            "ip": ip,
+                            "date": date,
+                            "md5": md5,
+                            "sha1": sha1,
+                            "sha256": sha256,
                         }
                     )
 
@@ -112,32 +110,37 @@ def main(bootstrap_servers, host, port, user, password):
                     raw = deep_get(data,
                                    'leaf_cert.as_der',
                                    "")
-                    body = {
-                        "date": date,
-                        "sha1": sha1,
-                        "issuer_common_name": issuer_common_name,
-                        "subject_common_name": subject_common_name,
-                        "raw": raw,
-                        "ct": True,
-                    }
+
                     actions.append(
                         {
                             "_index": "certificates",
                             "_id": sha1,
-                            "doc": body
+                            "date": date,
+                            "sha1": sha1,
+                            "issuer_common_name": issuer_common_name,
+                            "subject_common_name": subject_common_name,
+                            "raw": raw,
+                            "ct": True,
                         }
                     )
 
                 elif msg.topic() == "tags":
-                    body = json.loads(msg.value())
+                    message = json.loads(msg.value())
+                    date = message['date']
+                    sha1 = message['sha1']
+                    tag = message['tag']
+                    comment = message['comment']
                     actions.append(
                         {
                             "_index": "tags",
-                            "doc": body
+                            "date": date,
+                            "sha1": sha1,
+                            "tag": tag,
+                            "comment": comment,
                         }
                     )
-                if len(actions > 1000):
-                    es.bulk(es, iter(actions))
+                if len(actions) > 5000:
+                    bulk(es, iter(actions))
                     actions = []
 
     except KeyboardInterrupt:
