@@ -104,7 +104,8 @@
     $(document).ready(function () {
         $('#datatable').DataTable({
             "lengthMenu": [20, 50, 100, "All"],
-            "pageLength": 20
+            "pageLength": 20,
+            "order": [[ 3, "desc" ]],
         });
         $('.dataTables_length').addClass('bs-select');
     });
