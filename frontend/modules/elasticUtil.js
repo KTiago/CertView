@@ -97,7 +97,7 @@ module.exports = {
     },
     generateCSV : async function () {
         result = await client.search({
-            index: "icedid", // replace by "tags"
+            index: "tags",
             body: {
                 query: {
                     "match_all": {}
@@ -113,8 +113,10 @@ module.exports = {
             hits = result['body']['hits']['hits']
             for (var i = 0; i < hits.length; i++) {
                 list.push({
-                    ip : hits[i]['_source']['ip'],
+                    tag : hits[i]['_source']['tag'],
                     sha1 : hits[i]['_source']['sha1'],
+                    comment : hits[i]['_source']['comment'],
+                    date : hits[i]['_source']['date'],
                 })
             }
             csv = new ObjectsToCsv(list)
