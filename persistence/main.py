@@ -19,6 +19,7 @@ def main(bootstrap_servers, host, port, user, password):
     # Elasticsearch configuration
     es = Elasticsearch([{'host': host, 'port': port}], http_auth=(user, password))
 
+    actions = []
     try:
         while True:
             msg = consumer.poll(timeout=1.0)
@@ -87,12 +88,12 @@ def main(bootstrap_servers, host, port, user, password):
                         "sha1": sha1,
                         "sha256": sha256,
                     }
-                    try:
-                        res = es.index(index="hosts_{date}".format(date=date), body=body)
-                        if res['result'] != "created" and res['result'] != "updated":
-                            logging.warning(str(res))
-                    except Exception as e:
-                        logging.error(e)
+                    actions.append(
+                        {
+                            "_index" : "hosts_{date}".format(date=date),
+                            "doc" : body
+                        }
+                    )
 
                 elif topic == "ct":
                     message = json.loads(msg.value())
@@ -119,17 +120,25 @@ def main(bootstrap_servers, host, port, user, password):
                         "raw": raw,
                         "ct": True,
                     }
-                    try:
-                        res = es.index(index="certificates", id=sha1, body=body)
-                    except Exception as e:
-                        logging.error(e)
+                    actions.append(
+                        {
+                            "_index": "certificates",
+                            "_id": sha1,
+                            "doc": body
+                        }
+                    )
 
                 elif msg.topic() == "tags":
                     body = json.loads(msg.value())
-                    try:
-                        res = es.index(index="tags", body=body)
-                    except Exception as e:
-                        logging.error(e)
+                    actions.append(
+                        {
+                            "_index": "tags",
+                            "doc": body
+                        }
+                    )
+                if len(actions > 1000):
+                    es.bulk(es, iter(actions))
+                    actions = []
 
     except KeyboardInterrupt:
         sys.stderr.write('Aborted by user\n')
