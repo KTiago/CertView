@@ -17,7 +17,7 @@ router.get('/', async function(req, res, next) {
       res.status(404)
       res.render('certificate_not_found')
     }else{
-      cshash = cshashUtil.cshash(certificate['subject_common_name'])
+      cshash = cshashUtil.cshash(certificate['raw'])
       res.render('certificate', {
         certificate: certificate,
         hosts : hosts,
