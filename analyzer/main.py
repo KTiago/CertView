@@ -1,6 +1,6 @@
 import yaml
 from analyzer.analysis import Analyzer, Module
-from helpers.utils import deep_get
+from helpers.utils import deep_get, CSHash
 import logging
 
 class IcedidModule1(Module):
@@ -51,9 +51,17 @@ class IcedidModule1(Module):
                 and issuer_common_name == subject_common_name \
                 and validity == 31536000 \
                 and key_length == 2048:
-            return True, "cluster-3"
-        else:
-            return False, None
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "108d4ee4b9f3cd5c0efba8af2dab5009" : True,
+            }
+            if allowed_hashes[cshash]:
+                return True, "cluster-3"
+
+        return False, None
 
 
 class IcedidModule2(Module):

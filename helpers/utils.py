@@ -4,6 +4,11 @@ import confluent_kafka
 from threading import Thread
 import json
 from functools import reduce
+import subprocess
+
+def CSHash(cert):
+    result = subprocess.run(['./helpers/cshash', cert], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    return result
 
 def deep_get(dictionary, keys, default=None):
     return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."),

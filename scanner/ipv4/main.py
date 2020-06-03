@@ -7,7 +7,7 @@ import datetime
 import subprocess
 import logging
 
-from helpers.utils import AsyncProducer, deep_get, LoggerWriter
+from helpers.utils import AsyncProducer, deep_get, LoggerWriter, CSHash
 
 async def scan(producer):
     while True:  # Continuously run new full IPv4 range scans
