@@ -97,6 +97,25 @@ class GoziModule1(Module):
                 return True, "cluster-1"
         return False, None
 
+class PhishingModule1(Module):
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+        blacklist = ["paypal", "google", "apple", "microsoft", "facebook", "twitter", "amazon"]
+        subject_common_name = deep_get(data,
+                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name')
+
+        if len(subject_common_name) > 30:
+            for keyword in blacklist:
+                if keyword in subject_common_name:
+                    print("keyword phishing")
+                    print(subject_common_name)
+                    sha1 = deep_get(data,
+                                   'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha1',
+                                   "")
+                    print(sha1)
+        return False, None
+
 
 def main(bootstrap_servers):
     # Logger setup
@@ -105,7 +124,7 @@ def main(bootstrap_servers):
                         filename='analyzer.log',
                         level=logging.DEBUG)
 
-    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi")]
+    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi"), PhishingModule1("phishing")]
     topics = ["scan"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
     malware_analyzer.start()
