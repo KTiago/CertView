@@ -89,6 +89,10 @@
                     <td><%= certificate['scan'] === true %></td>
                 </tr>
                 <tr>
+                    <th scope="row">CSHash</th>
+                    <td><%= cshash %></td>
+                </tr>
+                <tr>
                     <th scope="row">ASN.1 structure</th>
                     <td><a target="_blank" rel="noopener noreferrer" href="https://lapo.it/asn1js/#<%= certificate['raw'] %>">External link to online decoder</a></td>
                 </tr>

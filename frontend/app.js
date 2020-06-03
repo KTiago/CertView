@@ -11,7 +11,7 @@ var certificatesRouter = require('./routes/certificates');
 
 var app = express();
 if (app.get('env') === 'development'){
-  app.set('port', 3001)
+  app.set('port', 3000)
 }
 app.use(favicon(path.join(__dirname, 'public', 'images','favicon.ico')))
 

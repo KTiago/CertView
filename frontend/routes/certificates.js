@@ -1,6 +1,7 @@
 var express = require('express');
 var elastic = require('../modules/elasticUtil')
 var router = express.Router();
+var cshashUtil = require('../modules/cshashUtil');
 
 router.get('/', async function(req, res, next) {
   var sha1 = req.query.sha1
@@ -16,9 +17,11 @@ router.get('/', async function(req, res, next) {
       res.status(404)
       res.render('certificate_not_found')
     }else{
+      cshash = cshashUtil.cshash(certificate['subject_common_name'])
       res.render('certificate', {
         certificate: certificate,
-        hosts : hosts
+        hosts : hosts,
+        cshash : cshash,
       });
     }
   }
