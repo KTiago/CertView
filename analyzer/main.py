@@ -9,6 +9,8 @@ class IcedidModule1(Module):
         if topic != "scan":
             return False, None
 
+
+
         issuer_common_name = deep_get(data,
                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer.common_name')
         if issuer_common_name:
@@ -56,9 +58,9 @@ class IcedidModule1(Module):
                             "")
             cshash = CSHash(cert)
             allowed_hashes = {
-                "108d4ee4b9f3cd5c0efba8af2dab5009" : True,
+                "108d4ee4b9f3cd5c0efba8af2dab5009",
             }
-            if allowed_hashes[cshash]:
+            if cshash in allowed_hashes:
                 return True, "cluster-3"
 
         return False, None

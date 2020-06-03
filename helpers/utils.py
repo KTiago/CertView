@@ -8,6 +8,7 @@ import subprocess
 
 def CSHash(cert):
     result = subprocess.run(['./helpers/cshash', cert], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    result = result[:-1] #strip trailing '\n'
     return result
 
 def deep_get(dictionary, keys, default=None):

@@ -139,7 +139,7 @@ def main(bootstrap_servers, host, port, user, password):
                             "comment": comment,
                         }
                     )
-                if len(actions) > 5000:
+                if len(actions) > 1000:
                     bulk(es, iter(actions))
                     actions = []
 
