@@ -2,6 +2,9 @@
 body {
   padding-top: 3.5rem;
 }
+#cert {
+  margin-bottom: 20px;
+}
 
 .form-control-borderless {
   border: none;
