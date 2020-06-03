@@ -103,7 +103,8 @@ class PhishingModule1(Module):
             return False, None
         blacklist = ["paypal", "google", "apple", "microsoft", "facebook", "twitter", "amazon"]
         subject_common_name = deep_get(data,
-                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name')
+                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name',
+                                       "")
 
         if len(subject_common_name) > 30:
             for keyword in blacklist:
