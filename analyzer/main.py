@@ -2,6 +2,7 @@ import yaml
 from analyzer.analysis import Analyzer, Module
 from helpers.utils import deep_get, CSHash
 import logging
+import csv
 
 class IcedidModule1(Module):
 
@@ -97,24 +98,38 @@ class GoziModule1(Module):
                 return True, "cluster-1"
         return False, None
 
+#
 class PhishingModule1(Module):
+    THRESHOLD = 1000
+
+    def __init__(self, tag):
+        super().__init__(tag)
+        self.top_domains = self.__load_alexa()
+
+    def __load_alexa(self):
+        top_domains = []
+        with open("data/alexa.csv", "r") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if row[0] > self.THRESHOLD:
+                    break
+                top_domains.append(row[1])
+        return top_domains
+
     def analyze(self, topic, data):
-        if topic != "scan":
-            return False, None
-        blacklist = ["paypal", "google", "apple", "microsoft", "facebook", "twitter", "amazon"]
         subject_common_name = deep_get(data,
                                        'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name',
-                                       "")
-
-        if len(subject_common_name) > 30:
-            for keyword in blacklist:
-                if keyword in subject_common_name:
-                    print("keyword phishing")
-                    print(subject_common_name)
+                                       None)
+        if subject_common_name:
+            subject_common_name = subject_common_name[0]
+            for domain in self.top_domains:
+                if subject_common_name.find(domain, 0, len(domain) - 1) != -1:
+                    logging.info("prefix phishing")
+                    logging.info(subject_common_name)
                     sha1 = deep_get(data,
                                    'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha1',
                                    "")
-                    print(sha1)
+                    logging.info(sha1)
         return False, None
 
 
@@ -126,7 +141,7 @@ def main(bootstrap_servers):
                         level=logging.DEBUG)
 
     modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi"), PhishingModule1("phishing")]
-    topics = ["scan"]
+    topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
     malware_analyzer.start()
 

@@ -196,7 +196,7 @@
                 <tbody>
                 <% for (var i = 0; i < hosts.length;  i++) { %>
                     <tr>
-                        <td><%= hosts[i]['ip'] %>    <a target="_blank" rel="noopener noreferrer" href="https://www.virustotal.com/gui/ip-address/<%= hosts[i]['ip'] %>/detection">VT</a></td>
+                        <td><a target="_blank" rel="noopener noreferrer" href="https://www.virustotal.com/gui/ip-address/<%= hosts[i]['ip'] %>/detection"><%= hosts[i]['ip']%>&nbsp;&nbsp;&nbsp;&nbsp;<img border="0" alt="VirusTotal" src="/images/vt.png" width="20" height="20" style="vertical-align:middle"></a></td>
                         <td><%= hosts[i]['first_seen'] %></td>
                         <td><%= hosts[i]['last_seen'] %></td>
                         <td><%= hosts[i]['tls_version'] %></td>
