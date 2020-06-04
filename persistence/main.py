@@ -18,7 +18,7 @@ def main(bootstrap_servers, host, port, user, password):
     consumer.subscribe(["scan", "ct", "tags"])
 
     # Elasticsearch configuration
-    es = Elasticsearch([{'host': host, 'port': port}], http_auth=(user, password))
+    es = Elasticsearch([{'host': host, 'port': port}], http_auth=(user, password), timeout=60)
 
     actions = []
     try:
@@ -40,14 +40,6 @@ def main(bootstrap_servers, host, port, user, password):
                                    'data.tls.result.handshake_log.server_certificates.certificate.raw',
                                    "")
 
-                    issuer_common_name = deep_get(data,
-                                                  'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer.common_name',
-                                                  "")
-
-                    subject_common_name = deep_get(data,
-                                                   'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name',
-                                                   "")
-
                     tls_version = deep_get(data,
                                            'data.tls.result.handshake_log.server_hello.version.value',
                                            "")
@@ -63,8 +55,6 @@ def main(bootstrap_servers, host, port, user, password):
                             "_id": sha1,
                             "date": date,
                             "sha1": sha1,
-                            "issuer_common_name": issuer_common_name,
-                            "subject_common_name": subject_common_name,
                             "raw": raw,
                             "scan": True,
                         }
@@ -117,8 +107,6 @@ def main(bootstrap_servers, host, port, user, password):
                             "_id": sha1,
                             "date": date,
                             "sha1": sha1,
-                            "issuer_common_name": issuer_common_name,
-                            "subject_common_name": subject_common_name,
                             "raw": raw,
                             "ct": True,
                         }
