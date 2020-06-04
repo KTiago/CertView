@@ -100,7 +100,7 @@ class GoziModule1(Module):
 
 #
 class PhishingModule1(Module):
-    THRESHOLD = 1000
+    THRESHOLD = 10000
 
     def __init__(self, tag):
         super().__init__(tag)
@@ -108,12 +108,14 @@ class PhishingModule1(Module):
 
     def __load_alexa(self):
         top_domains = []
-        with open("data/alexa.csv", "r") as file:
+        with open("analyzer/data/alexa.csv", "r") as file:
             reader = csv.reader(file)
+            count = 0
             for row in reader:
-                if row[0] > self.THRESHOLD:
+                if count > self.THRESHOLD:
                     break
                 top_domains.append(row[1])
+                count += 1
         return top_domains
 
     def analyze(self, topic, data):
@@ -123,13 +125,17 @@ class PhishingModule1(Module):
         if subject_common_name:
             subject_common_name = subject_common_name[0]
             for domain in self.top_domains:
-                if subject_common_name.find(domain, 0, len(domain) - 1) != -1:
-                    logging.info("prefix phishing")
-                    logging.info(subject_common_name)
-                    sha1 = deep_get(data,
-                                   'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha1',
-                                   "")
-                    logging.info(sha1)
+                index = subject_common_name.find(domain)
+                if index != -1:
+                    suffix = index + len(domain) < len(subject_common_name)
+                    prefix = index > 0 and subject_common_name[index - 1] != '.'
+                    if suffix or prefix:
+                        logging.info("prefix phishing")
+                        logging.info(subject_common_name)
+                        sha1 = deep_get(data,
+                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha1',
+                                       "")
+                        logging.info(sha1)
         return False, None
 
 
