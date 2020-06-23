@@ -33,7 +33,15 @@ module.exports = {
         if (result['statusCode'] !== 200){
             return []
         }
-        return result['body']['hits']['hits']
+        hits = result['body']['hits']['hits']
+        const unique = Map()
+        for (var i = 0; i < hits.length; i++) {
+            value = unique.get(hits[i]['_source']['sha1'])
+            if (value === undefined || value['_source']['date'] > hits[i]['_source']['date']){
+                unique.set(hits[i]['_source']['sha1'], hits[i])
+            }
+        }
+        return Array.from(unique.values());
     },
     searchHosts: async function(sha1){
         result = await client.search({

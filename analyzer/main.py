@@ -101,6 +101,7 @@ class GoziModule1(Module):
 #
 class PhishingModule1(Module):
     THRESHOLD = 10000
+    BLACKLIST = {"office.com","health.com", "weather.com"}
 
     def __init__(self, tag):
         super().__init__(tag)
@@ -112,9 +113,12 @@ class PhishingModule1(Module):
             reader = csv.reader(file)
             count = 0
             for row in reader:
+                domain = row[1]
                 if count > self.THRESHOLD:
                     break
-                top_domains.append(row[1])
+                if domain in self.BLACKLIST or len(domain < 8):
+                    continue
+                top_domains.append(domain)
                 count += 1
         return top_domains
 
