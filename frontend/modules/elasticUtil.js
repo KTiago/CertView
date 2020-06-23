@@ -34,7 +34,7 @@ module.exports = {
             return []
         }
         hits = result['body']['hits']['hits']
-        const unique = Map()
+        const unique = new Map()
         for (var i = 0; i < hits.length; i++) {
             value = unique.get(hits[i]['_source']['sha1'])
             if (value === undefined || value['_source']['date'] > hits[i]['_source']['date']){
