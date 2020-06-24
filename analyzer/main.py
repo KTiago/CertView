@@ -61,6 +61,12 @@ class IcedidModule1(Module):
             allowed_hashes = {
                 "108d4ee4b9f3cd5c0efba8af2dab5009",
             }
+            print("MAYBE FOUND ICEDID")
+            print(cert)
+            print(cshash)
+            print(allowed_hashes)
+            print("")
+
             if cshash in allowed_hashes:
                 return True, "cluster-3"
 
@@ -94,8 +100,27 @@ class GoziModule1(Module):
             allowed_hashes = {
                 "108d4ee4b9f3cd5c0efba8af2dab5009",
             }
+
+            print("MAYBE FOUND GOZI")
+            print(cert)
+            print(cshash)
+            print(allowed_hashes)
+            print("")
+
             if cshash in allowed_hashes:
                 return True, "cluster-1"
+        return False, None
+
+class TrickbotModule1(Module):
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+
+        issuer_dn = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
+
+        if issuer_dn == "C=GB, ST=London, L=London, O=Global Security, OU=IT Department, CN=example.com":
+            return True, "cluster-1"
+
         return False, None
 
 #
@@ -150,7 +175,7 @@ def main(bootstrap_servers):
                         filename='analyzer.log',
                         level=logging.DEBUG)
 
-    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi"), PhishingModule1("phishing")]
+    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi"), TrickbotModule1("trickbot")]# PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
     malware_analyzer.start()
