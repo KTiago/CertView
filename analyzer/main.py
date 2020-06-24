@@ -119,7 +119,22 @@ class TrickbotModule1(Module):
         issuer_dn = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
 
         if issuer_dn == "C=GB, ST=London, L=London, O=Global Security, OU=IT Department, CN=example.com":
-            return True, "cluster-1"
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "b00e2855520f59644754e8bfa6dc1821",
+            }
+
+            print("MAYBE FOUND TRICKBOT")
+            print(cert)
+            print(cshash)
+            print(allowed_hashes)
+            print("")
+
+            if cshash in allowed_hashes:
+                return True, "cluster-1"
 
         return False, None
 
