@@ -100,7 +100,7 @@ class GoziModule1(Module):
                             "")
             cshash = CSHash(cert)
             allowed_hashes = {
-                "108d4ee4b9f3cd5c0efba8af2dab5009",
+                "b00e2855520f59644754e8bfa6dc1821",
             }
 
 
