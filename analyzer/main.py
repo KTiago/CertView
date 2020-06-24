@@ -128,6 +128,7 @@ class TrickbotModule1(Module):
             cshash = CSHash(cert)
             allowed_hashes = {
                 "b00e2855520f59644754e8bfa6dc1821",
+                "612c9021db95bd4323cbcd3d00fedca7",
             }
 
 
