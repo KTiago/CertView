@@ -52,8 +52,8 @@ class IcedidModule1(Module):
 
         if correct_pattern \
                 and issuer_common_name == subject_common_name \
-                and validity == 31536000 \
-                and key_length == 2048:
+                and int(validity) == 31536000 \
+                and int(key_length) == 2048:
             logging.info("MAYBE FOUND ICEDID")
             cert = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.raw',
@@ -82,8 +82,16 @@ class IcedidModule2(Module):
         issuer_dn = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
 
         if issuer_dn == "CN=localhost, C=AU, ST=Some-State, O=Internet Widgits Pty Ltd":
-            return True, "cluster-4"
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "3fbc3c90292240b7a5e5ff9a7130d59c",
+            }
 
+            if cshash in allowed_hashes:
+                return True, "cluster-4"
         return False, None
 
 class GoziModule1(Module):
@@ -142,10 +150,40 @@ class TrickbotModule1(Module):
 
         return False, None
 
+class DridexModule1(Module):
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+
+        issuer_dn = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
+
+        if issuer_dn == "O=FASTVPS, CN=parking":
+            logging.info("MAYBE FOUND DRIDEX")
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "0a8940ab07f7dbfabc238c80edb05426",
+            }
+
+
+            logging.info(cert)
+            logging.info(cshash)
+            logging.info(allowed_hashes)
+            logging.info("")
+
+            if cshash in allowed_hashes:
+                return True, "cluster-1"
+
+        return False, None
+
 class QnodeserviceModule1(Module):
     def analyze(self, topic, data):
         if topic == "scan":
             subject_common_name = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name', "")
+            if subject_common_name:
+                subject_common_name = subject_common_name[0]
         elif topic == "ct":
             subject_common_name = deep_get(data,
                                            'leaf_cert.subject.CN',
@@ -161,7 +199,35 @@ class QnodeserviceModule1(Module):
 
         return False, None
 
-#
+class FindposModule1(Module):
+
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+        validity = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.parsed.validity.length')
+        issuer_dn = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
+
+        if issuer_dn == "C=XX, L=Default City, O=Default Company Ltd" and int(validity) == 172800000:
+            logging.info("MAYBE FOUND FindPos")
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "d29c030a2687b4e3364811e73700c523",
+            }
+
+            logging.info(cert)
+            logging.info(cshash)
+            logging.info(allowed_hashes)
+            logging.info("")
+
+            if cshash in allowed_hashes:
+                return True, "cluster-1"
+
+        return False, None
+
 class PhishingModule1(Module):
     THRESHOLD = 1000
     BLACKLIST = {"office.com","health.com", "weather.com"}
@@ -216,7 +282,13 @@ def main(bootstrap_servers):
                         filename='analyzer.log',
                         level=logging.DEBUG)
 
-    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi"), TrickbotModule1("trickbot"), QnodeserviceModule1("qnodeservice")]#, PhishingModule1("phishing")]
+    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"),
+               GoziModule1("gozi"),
+               TrickbotModule1("trickbot"),
+               QnodeserviceModule1("qnodeservice"),
+               DridexModule1("dridex"),
+               FindposModule1("findpos"),
+               ]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
     malware_analyzer.start()
