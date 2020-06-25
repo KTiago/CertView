@@ -184,6 +184,8 @@ class QnodeserviceModule1(Module):
             subject_common_name = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name', "")
             if subject_common_name:
                 subject_common_name = subject_common_name[0]
+            else:
+                return False, None
         elif topic == "ct":
             subject_common_name = deep_get(data,
                                            'leaf_cert.subject.CN',
