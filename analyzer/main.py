@@ -142,9 +142,28 @@ class TrickbotModule1(Module):
 
         return False, None
 
+class QnodeserviceModule1(Module):
+    def analyze(self, topic, data):
+        if topic == "scan":
+            subject_common_name = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name', "")
+        elif topic == "ct":
+            subject_common_name = deep_get(data,
+                                           'leaf_cert.subject.CN',
+                                           "")
+        else:
+            subject_common_name = ""
+
+        suffixes = ['.ddns.net', '.spdns.org', '.duckdns.org', '.myddns.com']
+        for suffix in suffixes:
+            length = len(subject_common_name)
+            if len(suffix) < length and subject_common_name[length - len(suffix):] == suffix:
+                return True, "cluster-1"
+
+        return False, None
+
 #
 class PhishingModule1(Module):
-    THRESHOLD = 10000
+    THRESHOLD = 1000
     BLACKLIST = {"office.com","health.com", "weather.com"}
 
     def __init__(self, tag):
@@ -160,31 +179,34 @@ class PhishingModule1(Module):
                 domain = row[1]
                 if count > self.THRESHOLD:
                     break
-                if domain in self.BLACKLIST or len(domain < 8):
+                if domain in self.BLACKLIST or len(domain) < 8:
                     continue
                 top_domains.append(domain)
                 count += 1
         return top_domains
 
     def analyze(self, topic, data):
-        subject_common_name = deep_get(data,
-                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name',
-                                       None)
-        if subject_common_name:
-            subject_common_name = subject_common_name[0]
-            for domain in self.top_domains:
-                index = subject_common_name.find(domain)
-                if index != -1:
-                    suffix = index + len(domain) < len(subject_common_name)
-                    prefix = index > 0 and subject_common_name[index - 1] != '.'
-                    if suffix or prefix:
-                        logging.info("prefix phishing")
-                        logging.info(subject_common_name)
-                        sha1 = deep_get(data,
-                                       'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha1',
-                                       "")
-                        logging.info(sha1)
-        return False, None
+        if topic == "ct":
+            subject_common_name = deep_get(data,
+                                           'leaf_cert.subject.CN',
+                                           "")
+            if subject_common_name:
+                for domain in self.top_domains:
+                    index = subject_common_name.find(domain)
+                    if index != -1:
+                        suffix = index + len(domain) < len(subject_common_name)
+                        prefix = index > 0 and subject_common_name[index - 1] != '.'
+                        if suffix or prefix:
+                            print("prefix phishing")
+                            print(subject_common_name)
+                            print(domain)
+                            sha1 = deep_get(data,
+                                           'data.tls.result.handshake_log.server_certificates.certificate.parsed.fingerprint_sha1',
+                                           "")
+                            print(sha1)
+            return False, None
+        else:
+            return False, None
 
 
 def main(bootstrap_servers):
@@ -194,7 +216,7 @@ def main(bootstrap_servers):
                         filename='analyzer.log',
                         level=logging.DEBUG)
 
-    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi"), TrickbotModule1("trickbot")]# PhishingModule1("phishing")]
+    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"), GoziModule1("gozi"), TrickbotModule1("trickbot"), QnodeserviceModule1("qnodeservice")]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
     malware_analyzer.start()
