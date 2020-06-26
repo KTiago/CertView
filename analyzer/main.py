@@ -206,14 +206,12 @@ class CobaltstrikeModule1(Module):
             return False, None
         serial = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.parsed.serial_number')
-
         if int(serial) == 146473198:
             return True, "CobaltStrike C2"
 
         return False, None
 
 class CobaltstrikeModule2(Module):
-
     def analyze(self, topic, data):
         if topic != "scan":
             return False, None
@@ -228,9 +226,17 @@ class CobaltstrikeModule2(Module):
         }
 
         if cshash in allowed_hashes:
-            logging.info("Cobalt weirdness")
-            logging.info(cert)
-            return False, None
+            C = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.country')
+            L = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.locality')
+            ST = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.province')
+            O = deep_get(data,
+                         'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organization')
+            OU = deep_get(data,
+                          'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organizational_unit')
+            if (C and C[0]=='') or (L and L[0] == '') or (ST and ST[0] == '') or (O and O[0] == '') or (OU and OU[0] == ''):
+                logging.info("Cobalt weirdness")
+                logging.info(cert)
+                return False, None
 
         return False, None
 
