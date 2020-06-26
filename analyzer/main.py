@@ -200,18 +200,6 @@ class FindposModule1(Module):
         return False, None
 
 class CobaltstrikeModule1(Module):
-
-    def analyze(self, topic, data):
-        if topic != "scan":
-            return False, None
-        serial = deep_get(data,
-                            'data.tls.result.handshake_log.server_certificates.certificate.parsed.serial_number')
-        if int(serial) == 146473198:
-            return True, "CobaltStrike Default Certificate"
-
-        return False, None
-
-class CobaltstrikeModule2(Module):
     def analyze(self, topic, data):
         if topic != "scan":
             return False, None
@@ -234,7 +222,12 @@ class CobaltstrikeModule2(Module):
                 "4f8c042aa2987ce4d06797a84b2f832d",
             }
             if cshash in allowed_hashes:
-                return True, "CobaltStrike C2"
+                serial = deep_get(data,
+                                  'data.tls.result.handshake_log.server_certificates.certificate.parsed.serial_number')
+                if int(serial) == 146473198:
+                    return True, "CobaltStrike Default Certificate"
+                else:
+                    return True, "CobaltStrike C2"
 
         return False, None
 
@@ -299,7 +292,6 @@ def main(bootstrap_servers):
                #DridexModule1("dridex"),
                FindposModule1("findpos"),
                CobaltstrikeModule1("cobaltstrike"),
-               CobaltstrikeModule2("cobaltstrike"),
                ]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
