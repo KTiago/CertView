@@ -212,6 +212,28 @@ class CobaltstrikeModule1(Module):
 
         return False, None
 
+class CobaltstrikeModule2(Module):
+
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+
+        cert = deep_get(data,
+                        'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                        "")
+
+        cshash = CSHash(cert)
+        allowed_hashes = {
+            "4f8c042aa2987ce4d06797a84b2f832d",
+        }
+
+        if cshash in allowed_hashes:
+            logging.info("Cobalt weirdness")
+            logging.info(cert)
+            return False, None
+
+        return False, None
+
 class PhishingModule1(Module):
     THRESHOLD = 1000
     BLACKLIST = {"office.com","health.com", "weather.com"}
@@ -273,6 +295,7 @@ def main(bootstrap_servers):
                #DridexModule1("dridex"),
                FindposModule1("findpos"),
                CobaltstrikeModule1("cobaltstrike"),
+               CobaltstrikeModule2("cobaltstrike"),
                ]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
