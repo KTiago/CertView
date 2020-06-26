@@ -230,6 +230,19 @@ class FindposModule1(Module):
 
         return False, None
 
+class CobaltstrikeModule1(Module):
+
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+        serial = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.parsed.serial_number')
+
+        if int(serial) == 146473198:
+            return True, "CobaltStrike C2"
+
+        return False, None
+
 class PhishingModule1(Module):
     THRESHOLD = 1000
     BLACKLIST = {"office.com","health.com", "weather.com"}
@@ -287,9 +300,10 @@ def main(bootstrap_servers):
     modules = [IcedidModule1("icedid"), IcedidModule2("icedid"),
                GoziModule1("gozi"),
                TrickbotModule1("trickbot"),
-               QnodeserviceModule1("qnodeservice"),
-               DridexModule1("dridex"),
+               #QnodeserviceModule1("qnodeservice"),
+               #DridexModule1("dridex"),
                FindposModule1("findpos"),
+               CobaltstrikeModule1("cobaltstrike"),
                ]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
