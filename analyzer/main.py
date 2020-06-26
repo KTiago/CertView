@@ -216,24 +216,24 @@ class CobaltstrikeModule2(Module):
         if topic != "scan":
             return False, None
 
-        cert = deep_get(data,
-                        'data.tls.result.handshake_log.server_certificates.certificate.raw',
-                        "")
 
-        cshash = CSHash(cert)
-        allowed_hashes = {
-            "4f8c042aa2987ce4d06797a84b2f832d",
-        }
+        C = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.country')
+        L = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.locality')
+        ST = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.province')
+        O = deep_get(data,
+                     'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organization')
+        OU = deep_get(data,
+                      'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organizational_unit')
 
-        if cshash in allowed_hashes:
-            C = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.country')
-            L = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.locality')
-            ST = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.province')
-            O = deep_get(data,
-                         'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organization')
-            OU = deep_get(data,
-                          'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organizational_unit')
-            if (C and C[0]=='') or (L and L[0] == '') or (ST and ST[0] == '') or (O and O[0] == '') or (OU and OU[0] == ''):
+        if (C and C[0]=='') or (L and L[0] == '') or (ST and ST[0] == '') or (O and O[0] == '') or (OU and OU[0] == ''):
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "4f8c042aa2987ce4d06797a84b2f832d",
+            }
+            if cshash in allowed_hashes:
                 return True, "CobaltStrike C2"
 
         return False, None
