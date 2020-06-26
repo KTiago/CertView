@@ -54,7 +54,6 @@ class IcedidModule1(Module):
                 and issuer_common_name == subject_common_name \
                 and int(validity) == 31536000 \
                 and int(key_length) == 2048:
-            logging.info("MAYBE FOUND ICEDID")
             cert = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.raw',
                             "")
@@ -62,11 +61,6 @@ class IcedidModule1(Module):
             allowed_hashes = {
                 "108d4ee4b9f3cd5c0efba8af2dab5009",
             }
-
-            logging.info(cert)
-            logging.info(cshash)
-            logging.info(allowed_hashes)
-            logging.info("")
 
             if cshash in allowed_hashes:
                 return True, "cluster-3"
@@ -102,7 +96,6 @@ class GoziModule1(Module):
         issuer_dn = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
 
         if issuer_dn == "C=XX, ST=1, L=1, O=1, OU=1, CN=*":
-            logging.info("MAYBE FOUND GOZI")
             cert = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.raw',
                             "")
@@ -110,13 +103,6 @@ class GoziModule1(Module):
             allowed_hashes = {
                 "b00e2855520f59644754e8bfa6dc1821",
             }
-
-
-            logging.info(cert)
-            logging.info(cshash)
-            logging.info(allowed_hashes)
-            logging.info("")
-
             if cshash in allowed_hashes:
                 return True, "cluster-1"
         return False, None
@@ -129,7 +115,6 @@ class TrickbotModule1(Module):
         issuer_dn = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
 
         if issuer_dn == "C=GB, ST=London, L=London, O=Global Security, OU=IT Department, CN=example.com":
-            logging.info("MAYBE FOUND TRICKBOT")
             cert = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.raw',
                             "")
@@ -140,10 +125,6 @@ class TrickbotModule1(Module):
             }
 
 
-            logging.info(cert)
-            logging.info(cshash)
-            logging.info(allowed_hashes)
-            logging.info("")
 
             if cshash in allowed_hashes:
                 return True, "cluster-1"
@@ -158,7 +139,6 @@ class DridexModule1(Module):
         issuer_dn = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
 
         if issuer_dn == "O=FASTVPS, CN=parking":
-            logging.info("MAYBE FOUND DRIDEX")
             cert = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.raw',
                             "")
@@ -167,11 +147,6 @@ class DridexModule1(Module):
                 "0a8940ab07f7dbfabc238c80edb05426",
             }
 
-
-            logging.info(cert)
-            logging.info(cshash)
-            logging.info(allowed_hashes)
-            logging.info("")
 
             if cshash in allowed_hashes:
                 return True, "cluster-1"
@@ -211,7 +186,6 @@ class FindposModule1(Module):
         issuer_dn = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer_dn')
 
         if issuer_dn == "C=XX, L=Default City, O=Default Company Ltd" and int(validity) == 172800000:
-            logging.info("MAYBE FOUND FindPos")
             cert = deep_get(data,
                             'data.tls.result.handshake_log.server_certificates.certificate.raw',
                             "")
@@ -219,11 +193,6 @@ class FindposModule1(Module):
             allowed_hashes = {
                 "d29c030a2687b4e3364811e73700c523",
             }
-
-            logging.info(cert)
-            logging.info(cshash)
-            logging.info(allowed_hashes)
-            logging.info("")
 
             if cshash in allowed_hashes:
                 return True, "cluster-1"
