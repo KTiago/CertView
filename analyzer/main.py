@@ -231,6 +231,31 @@ class CobaltstrikeModule1(Module):
 
         return False, None
 
+class MetasploitModule1(Module):
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+
+
+        CN = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name')
+        OU = deep_get(data,
+                      'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organizational_unit')
+        EMAIL = deep_get(data,
+                      'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.email_address')
+
+        if (CN and OU and EMAIL and EMAIL[0] == OU[0] + "@" + CN[0]):
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "b432fd10cb96cd7c0d6d07d8ad2afd73",
+            }
+            if cshash in allowed_hashes:
+                return True, "Metasploit C2"
+
+        return False, None
+
 class PhishingModule1(Module):
     THRESHOLD = 1000
     BLACKLIST = {"office.com","health.com", "weather.com"}
