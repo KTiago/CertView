@@ -256,6 +256,30 @@ class MetasploitModule1(Module):
 
         return False, None
 
+class EmpireModule1(Module):
+    def analyze(self, topic, data):
+        if topic != "scan":
+            return False, None
+
+
+        CN = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name')
+        C = deep_get(data,
+                      'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.country')
+
+        if CN is None and C and C[0] == "US":
+            cert = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                            "")
+            cshash = CSHash(cert)
+            allowed_hashes = {
+                "23468ff8bd0e196cdc4fcff56cf8eb7e",
+            }
+            if cshash in allowed_hashes:
+                return True, "Powershell Empire C2"
+
+        return False, None
+
+
 class PhishingModule1(Module):
     THRESHOLD = 1000
     BLACKLIST = {"office.com","health.com", "weather.com"}
@@ -317,6 +341,8 @@ def main(bootstrap_servers):
                #DridexModule1("dridex"),
                FindposModule1("findpos"),
                CobaltstrikeModule1("cobaltstrike"),
+               MetasploitModule1("metasploit"),
+               EmpireModule1("empire"),
                ]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
