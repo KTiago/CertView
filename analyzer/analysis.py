@@ -2,7 +2,7 @@ import confluent_kafka
 import asyncio
 import json
 import logging
-
+from helpers.utils import deep_get, CSHash
 
 from helpers.utils import AsyncProducer
 from abc import ABC, abstractmethod
@@ -13,7 +13,7 @@ class Module(ABC):
         super().__init__()
 
     @abstractmethod
-    def analyze(self, topic, data):
+    def analyze(self, topic, data, cshash):
         pass
 
 class Analyzer:
@@ -47,8 +47,12 @@ class Analyzer:
                     data = message['data']
                     date = message['date']
                     sha1 = message['sha1']
+                    cert = deep_get(data,
+                                    'data.tls.result.handshake_log.server_certificates.certificate.raw',
+                                    "")
+                    cshash = CSHash(cert)
                     for module in self.modules:
-                        match, comment = module.analyze(topic, data)
+                        match, comment = module.analyze(topic, data, cshash)
                         if match:
                             body = {
                                 "date": date,
