@@ -246,17 +246,29 @@ class PupyModule1(Module):
     def analyze(self, topic, data, cshash):
         if topic != "scan":
             return False, None
+        allowed_hashes = {
+            "f9e75ad1b99357a7df5bc2325a36d30c",
+        }
+        if cshash in allowed_hashes:
+            return True, "Pupy C2"
+
+        return False, None
+
+class CovenantModule1(Module):
+    def analyze(self, topic, data, cshash):
+        if topic != "scan":
+            return False, None
+
+        validity = deep_get(data,
+                            'data.tls.result.handshake_log.server_certificates.certificate.parsed.validity.length', "0")
 
 
-        issuer_O = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.issuer.organization')
-        subject_O = deep_get(data, 'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.organization')
-
-        if issuer_O and len(issuer_O[0]) == 10 and subject_O and len(subject_O[0]) == 10:
+        if  int(validity) == 315446400:
             allowed_hashes = {
-                "f9e75ad1b99357a7df5bc2325a36d30c",
+                "1ce2b13bea04aaccc85e2725f8d1e7f4",
             }
             if cshash in allowed_hashes:
-                return True, "Pupy C2"
+                return True, "Covenant c2"
 
         return False, None
 
@@ -277,6 +289,7 @@ def main(bootstrap_servers):
                MetasploitModule1("metasploit"),
                EmpireModule1("empire"),
                PupyModule1("pupy"),
+               CovenantModule1("covenant"),
                ]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]
     malware_analyzer = Analyzer(modules, topics, bootstrap_servers)
