@@ -238,7 +238,7 @@ class EmpireModule1(Module):
                 "23468ff8bd0e196cdc4fcff56cf8eb7e",
             }
             if cshash in allowed_hashes:
-                return True, "Powershell Empire C2"
+                return True, "Powershell Empire C2" # or APfell actually
 
         return False, None
 

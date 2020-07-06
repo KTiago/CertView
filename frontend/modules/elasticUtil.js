@@ -25,7 +25,7 @@ module.exports = {
                     "match_all": {}
                 }
             },
-            size: 1000,
+            size: 10000,
         },{
             ignore: [404],
             maxRetries: 3
@@ -53,7 +53,7 @@ module.exports = {
                     }
                 }
             },
-            size: 1000,
+            size: 10000,
         },{
             ignore: [404],
             maxRetries: 3
@@ -122,7 +122,7 @@ module.exports = {
                     "match_all": {}
                 }
             },
-            size: 1000,
+            size: 10000,
         },{
             ignore: [404],
             maxRetries: 3
