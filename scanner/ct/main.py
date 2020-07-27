@@ -27,39 +27,19 @@ import math
 import requests
 import sys
 import os
+import logging
 
 from random import randint
 
 import asyncio
-from helpers.utils import AsyncProducer
+from helpers.utils import AsyncProducer,  LoggerWriter
 from helpers.certlib import parse_ctl_entry
 
 
 class CTScanner(object):
     # These are a list of servers that we shouldn't even try to connect to. In testing they either had bad
     # DNS records, resolved to un-routable IP addresses, or didn't have valid SSL certificates.
-    BAD_CT_SERVERS = [
-        "alpha.ctlogs.org",
-        "clicky.ct.letsencrypt.org",
-        "ct.akamai.com",
-        "ct.filippo.io/behindthesofa",
-        "ct.gdca.com.cn",
-        "ct.izenpe.com",
-        "ct.izenpe.eus",
-        "ct.sheca.com",
-        "ct.startssl.com",
-        "ct.wosign.com",
-        "ctlog.api.venafi.com",
-        "ctlog.gdca.com.cn",
-        "ctlog.sheca.com",
-        "ctlog.wosign.com",
-        "ctlog2.wosign.com",
-        "flimsy.ct.nordu.net:8080",
-        "log.certly.io",
-        "nessie2021.ct.digicert.com/log",
-        "plausible.ct.nordu.net",
-        "www.certificatetransparency.cn/ct",
-    ]
+    BAD_CT_SERVERS = []
 
     MAX_BLOCK_SIZE = 64
 
@@ -67,9 +47,9 @@ class CTScanner(object):
         self.producer = _producer
         self.loop = _loop
         self.stopped = False
-        self.logger = logging.getLogger('certstream.watcher')
+        self.logger = logging.getLogger()
 
-        # logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
 
         # self.stream = asyncio.Queue(maxsize=3000)
 
@@ -129,7 +109,7 @@ class CTScanner(object):
     async def watch_for_updates_task(self, operator_information):
         try:
             # Randomize starting times to smooth spikes
-            await asyncio.sleep(randint(0, 20))
+            await asyncio.sleep(randint(0, 60))
             latest_size = 0
             name = operator_information['description']
             while not self.stopped:
@@ -143,7 +123,7 @@ class CTScanner(object):
                 except aiohttp.ClientError as e:
                     self.logger.info('[{}] Exception -> {}'.format(name, e))
                     print(e)
-                    await asyncio.sleep(20)
+                    await asyncio.sleep(60*60*24)
                     continue
 
                 tree_size = info.get('tree_size')
@@ -221,6 +201,12 @@ class CTScanner(object):
 
 
 def main(bootstrap_servers):
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        filename='ct-scan.log',
+                        level=logging.DEBUG)
+    sys.stderr = LoggerWriter(logging.getLogger(), logging.ERROR)
+    logging.info('Starting ipv4 scanning program')
     loop = asyncio.get_event_loop()
     config = {'bootstrap.servers': bootstrap_servers,
               'group.id': "ct-scan",
