@@ -113,7 +113,7 @@ class CTScanner(object):
             latest_size = 0
             name = operator_information['description']
             while not self.stopped:
-                date = datetime.now().strftime("%Y-%m-%d")
+                date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 try:
                     async with aiohttp.ClientSession(loop=self.loop,
                                                      connector=aiohttp.TCPConnector(ssl=False)) as session:
@@ -140,7 +140,7 @@ class CTScanner(object):
                                 data = parse_ctl_entry(entry, operator_information)
                                 sha1 = self.get_sha1(data)
                                 if sha1:
-                                    asyncio.create_task(self.producer.produce("ct", {"date": date, "data": data, "sha1": sha1}))
+                                    self.producer.produce("ct", {"date": date, "data": data, "sha1": sha1})
 
 
                     except aiohttp.ClientError as e:
@@ -206,7 +206,7 @@ def main(bootstrap_servers):
                         filename='ct-scan.log',
                         level=logging.DEBUG)
     sys.stderr = LoggerWriter(logging.getLogger(), logging.ERROR)
-    logging.info('Starting ipv4 scanning program')
+    logging.info('Starting CT scanning program')
     loop = asyncio.get_event_loop()
     config = {'bootstrap.servers': bootstrap_servers,
               'group.id': "ct-scan",

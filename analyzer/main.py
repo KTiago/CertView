@@ -6,7 +6,7 @@ import csv
 
 class IcedidModule1(Module):
 
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -59,14 +59,14 @@ class IcedidModule1(Module):
                 "108d4ee4b9f3cd5c0efba8af2dab5009",
             }
 
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "cluster-3"
 
         return False, None
 
 
 class IcedidModule2(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -77,12 +77,12 @@ class IcedidModule2(Module):
                 "3fbc3c90292240b7a5e5ff9a7130d59c",
             }
 
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "cluster-4"
         return False, None
 
 class GoziModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -92,12 +92,12 @@ class GoziModule1(Module):
             allowed_hashes = {
                 "b00e2855520f59644754e8bfa6dc1821",
             }
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "cluster-1"
         return False, None
 
 class TrickbotModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -109,13 +109,13 @@ class TrickbotModule1(Module):
                 "612c9021db95bd4323cbcd3d00fedca7",
             }
 
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "cluster-1"
 
         return False, None
 
 class DridexModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -127,13 +127,13 @@ class DridexModule1(Module):
             }
 
 
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "cluster-1"
 
         return False, None
 
 class QnodeserviceModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic == "scan":
             subject_common_name = deep_get(data,'data.tls.result.handshake_log.server_certificates.certificate.parsed.subject.common_name', "")
             if subject_common_name:
@@ -157,7 +157,7 @@ class QnodeserviceModule1(Module):
 
 class FindposModule1(Module):
 
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
         validity = deep_get(data,
@@ -169,13 +169,13 @@ class FindposModule1(Module):
                 "d29c030a2687b4e3364811e73700c523",
             }
 
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "cluster-1"
 
         return False, None
 
 class CobaltstrikeModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -192,7 +192,7 @@ class CobaltstrikeModule1(Module):
             allowed_hashes = {
                 "4f8c042aa2987ce4d06797a84b2f832d",
             }
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 serial = deep_get(data,
                                   'data.tls.result.handshake_log.server_certificates.certificate.parsed.serial_number')
                 if int(serial) == 146473198:
@@ -203,7 +203,7 @@ class CobaltstrikeModule1(Module):
         return False, None
 
 class MetasploitModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -218,13 +218,13 @@ class MetasploitModule1(Module):
             allowed_hashes = {
                 "b432fd10cb96cd7c0d6d07d8ad2afd73",
             }
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "Metasploit C2"
 
         return False, None
 
 class EmpireModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -237,25 +237,25 @@ class EmpireModule1(Module):
             allowed_hashes = {
                 "23468ff8bd0e196cdc4fcff56cf8eb7e",
             }
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "Powershell Empire C2" # or APfell actually
 
         return False, None
 
 class PupyModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
         allowed_hashes = {
             "f9e75ad1b99357a7df5bc2325a36d30c",
         }
-        if cshash in allowed_hashes:
+        if CSHash(cert) in allowed_hashes:
             return True, "Pupy C2"
 
         return False, None
 
 class CovenantModule1(Module):
-    def analyze(self, topic, data, cshash):
+    def analyze(self, topic, data, cert):
         if topic != "scan":
             return False, None
 
@@ -267,7 +267,7 @@ class CovenantModule1(Module):
             allowed_hashes = {
                 "1ce2b13bea04aaccc85e2725f8d1e7f4",
             }
-            if cshash in allowed_hashes:
+            if CSHash(cert) in allowed_hashes:
                 return True, "Covenant c2"
 
         return False, None
@@ -279,7 +279,8 @@ def main(bootstrap_servers):
                         filename='analyzer.log',
                         level=logging.DEBUG)
 
-    modules = [IcedidModule1("icedid"), IcedidModule2("icedid"),
+    modules = [#IcedidModule1("icedid"),
+               IcedidModule2("icedid"),
                GoziModule1("gozi"),
                TrickbotModule1("trickbot"),
                #QnodeserviceModule1("qnodeservice"),
@@ -288,7 +289,7 @@ def main(bootstrap_servers):
                CobaltstrikeModule1("cobaltstrike"),
                MetasploitModule1("metasploit"),
                EmpireModule1("empire"),
-               PupyModule1("pupy"),
+               #PupyModule1("pupy"),
                CovenantModule1("covenant"),
                ]#, PhishingModule1("phishing")]
     topics = ["scan", "ct"]

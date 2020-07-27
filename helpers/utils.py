@@ -40,7 +40,7 @@ class AsyncProducer:
         self._cancelled = True
         self._poll_thread.join()
 
-    def __produce(self, topic, value):
+    def produce(self, topic, value):
         result = self._loop.create_future()
 
         def ack(err, msg):
@@ -50,8 +50,4 @@ class AsyncProducer:
                 self._loop.call_soon_threadsafe(result.set_result, msg)
 
         self._producer.produce(topic, json.dumps(value).encode('utf-8'), on_delivery=ack)
-        return result
-
-    async def produce(self, topic, value):
-        result = await self.__produce(topic, value)
         return result

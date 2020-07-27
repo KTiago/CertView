@@ -50,9 +50,9 @@ class Analyzer:
                     cert = deep_get(data,
                                     'data.tls.result.handshake_log.server_certificates.certificate.raw',
                                     "")
-                    cshash = CSHash(cert)
+
                     for module in self.modules:
-                        match, comment = module.analyze(topic, data, cshash)
+                        match, comment = module.analyze(topic, data, cert)
                         if match:
                             body = {
                                 "date": date,
@@ -62,9 +62,8 @@ class Analyzer:
                             }
                             logging.info("Found match :")
                             logging.info(str(body))
-                            task = asyncio.create_task(self.producer.produce("tags", body))
-                            await task
-        except Exception as e: # TODO very bad error catching, please implement graceful shutdown
+                            self.producer.produce("tags", body)
+        except Exception as e:
             logging.error(e)
         finally:
             self.consumer.close()

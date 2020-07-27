@@ -22,7 +22,7 @@ async def scan(producer):
             if raw == b'' and proc.poll() is not None:
                 break
             if raw: # Handle new output line from zgrab
-                date = datetime.datetime.now().strftime("%Y-%m-%d")
+                date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 try:
                     data = json.loads(raw)
                     sha1 = deep_get(data,
@@ -30,7 +30,7 @@ async def scan(producer):
                                     None)
                     if sha1: # Send certificate and metadata to Kafka
                         body = {"date": date, "data": data, "sha1": sha1}
-                        asyncio.create_task(producer.produce("scan", body))
+                        producer.produce("scan", body)
                 except Exception as e:
                     logging.error(e)
                     continue
