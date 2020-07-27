@@ -160,8 +160,7 @@ class CTScanner(object):
                                 data = parse_ctl_entry(entry, operator_information)
                                 sha1 = self.get_sha1(data)
                                 if sha1:
-                                    result = await self.producer.produce("ct",
-                                                                         {"date": date, "data": data, "sha1": sha1})
+                                    asyncio.create_task(self.producer.produce("ct", {"date": date, "data": data, "sha1": sha1}))
 
 
                     except aiohttp.ClientError as e:
