@@ -15,9 +15,9 @@ This documents describes the commands required to setup and deploy the CertView 
     └── ipv4     	# Active IPv4 scanner using Zmap/Zgrab.
 ```
 ## Computing infrastructure
-To run the CertView platform, we opted for a cloud deployment on the Google Cloud Platform (GCP). We deployed CertView on 5 VMs, but the platform may be deployed on more machines or entirely on one machine. Each VM runs Debian-9.
+To run the CertView platform, we opted for a cloud deployment on the compute engine of the Google Cloud Platform (GCP). We deployed CertView on 5 VMs, but the platform may be deployed on more machines or entirely on one machine. Each VM runs Debian-9.
 
-The following hardware configuration is given as an example that supports continuously run 30h long IPv4 scans and Certificate Transparency logs. For faster scanning speeds, a more robust configuration might be required.
+The following hardware configuration is given as an example that supports continuously run 48h long IPv4 scans and Certificate Transparency logs. For faster scanning speeds, a more robust configuration might be required.
 1. Scan, 6 vCPUs, 5.5 GB RAM, 100 GB HDD
 2. Kafka, 1 vCPU, 3.75 GB RAM, 100 GB HDD
 3. Analyzer, 1 vCPU, 3.75 GB RAM, 100 GB HDD
@@ -26,7 +26,7 @@ The following hardware configuration is given as an example that supports contin
 
 ## VM Setup commands
 The following describes some of the commands we used to setup the VMs on Debian-9. Depending on your configuration, more commands might be required. This guide is probably not exhaustive.
-### Scan V
+### Scan VM
 Install python 3.8, 
 ```bash
 # Install python3.8
